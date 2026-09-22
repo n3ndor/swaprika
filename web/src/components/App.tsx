@@ -1,100 +1,32 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pepper } from './Pepper';
 import { DOCS, DOC_GROUPS, type Doc } from '../data/docs';
+import { INGREDIENTS, SITUATIONS, SWAPS, type Swap } from '../data/swaps';
 
 /** The design sets copy with em dashes; repo style bans the literal glyph. */
 const EM = String.fromCharCode(0x2014);
 const MIDDOT = String.fromCharCode(0x00b7);
 
 type Screen = 'home' | 'browse' | 'docs' | 'doc';
-type Dim = 'DISH_TYPE' | 'TECHNIQUE' | null;
 
-/**
- * The situation picker. Grouped for humans, but each entry still resolves to a
- * real schema enum, so the UI never invents a context the API cannot answer.
- */
-const SITS: { g: string; dim: Dim; items: [string, string][] }[] = [
-  { g: 'Anywhere', dim: null, items: [['ANY', 'anywhere']] },
-  {
-    g: 'Baking',
-    dim: 'DISH_TYPE',
-    items: [
-      ['CAKE', 'a cake'], ['COOKIE', 'cookies'], ['MUFFIN', 'muffins'],
-      ['QUICK_BREAD', 'a quick bread'], ['PANCAKE', 'pancakes'], ['CROISSANT', 'a croissant'],
-      ['MERINGUE', 'a meringue'], ['BUTTERCREAM', 'buttercream'], ['SODA_BREAD', 'soda bread'],
-      ['MOUSSE', 'a mousse'],
-    ],
-  },
-  {
-    g: 'Savoury and sauces',
-    dim: 'DISH_TYPE',
-    items: [
-      ['CURRY', 'a curry'], ['BECHAMEL', 'a bechamel'], ['FRIED_CHICKEN', 'fried chicken'],
-      ['QUICHE', 'a quiche'], ['FRUIT_SAUCE', 'a fruit sauce'], ['VINAIGRETTE', 'a vinaigrette'],
-      ['DIPPING_SAUCE', 'a dipping sauce'],
-    ],
-  },
-  {
-    g: 'Technique',
-    dim: 'TECHNIQUE',
-    items: [
-      ['CREAMING', 'creaming'], ['RUBBING_IN', 'rubbing in'], ['WHIPPING', 'whipping'],
-      ['THICKENING', 'thickening'], ['PAN_FRYING', 'pan frying'], ['LAMINATION', 'laminating'],
-      ['GLAZING', 'glazing'], ['BRINING', 'brining'], ['CARAMELISATION', 'caramelising'],
-    ],
-  },
-];
-
-/** Cooking order, not alphabetical. Butter first because it is the common case. */
-const ORDER = [
-  'butter', 'egg', 'egg-white', 'buttermilk', 'milk', 'heavy-cream',
-  'wheat-flour', 'cornstarch', 'sugar', 'lemon-juice', 'fish-sauce',
-];
+const SITS = SITUATIONS;
+const TECHNIQUE_GROUP = SITS.findIndex((g) => g.g === 'Technique');
 
 const WORD: [string, string][] = [
   ['S', 'ugar'], ['w', 'heat flour'], ['a', 'quafaba'], ['p', 'aprika'],
   ['r', 'icotta'], ['i', 'ce water'], ['k', 'efir'], ['a', 'pplesauce'],
 ];
 
-const PANTRY_QUERY = `query Pantry {
-  ingredients {
-    id
-    canonicalName
-    roles
-    substitutions {
-      edges {
-        node { canonicalName }
-        ratio { amount basis note }
-        preservesRoles
-        losesRoles
-        validFor { techniques excludedTechniques dishTypes excludedDishTypes }
-        effects { dimension direction note }
-        adjustments { action amount reason }
-        reliability
-      }
-    }
-  }
-}`;
-
-interface Sub {
-  to: string;
-  amount: number;
-  basis: string;
-  note: string | null;
-  keeps: string[];
-  loses: string[];
-  ok: string[];
-  no: string[];
-  eff: { dimension: string; direction: string; note: string | null }[];
-  adj: { action: string; amount: string | null; reason: string | null }[];
-  rel: string;
-}
 interface Ing {
   id: string;
   name: string;
   roles: string[];
-  subs: Sub[];
+  subs: Swap[];
 }
+
+/** Built once at load. The whole dataset ships with the page, so nothing is fetched. */
+const PANTRY: Ing[] = INGREDIENTS.map((i) => ({ ...i, subs: SWAPS.filter((s) => s.from === i.id) }));
+const TOTAL_SWAPS = SWAPS.length;
 
 const human = (s: string) => s.toLowerCase().replace(/_/g, ' ');
 const sentence = (s: string) => {
@@ -111,73 +43,9 @@ export default function App() {
   const [flipped, setFlipped] = useState(false);
   const [docId, setDocId] = useState<string | null>(null);
   const [letter, setLetter] = useState(0);
-  const [pantry, setPantry] = useState<Ing[]>([]);
 
   const resultsEl = useRef<HTMLElement | null>(null);
   const flipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Data. One request for the whole pantry: 21 edges is small enough that every
-  // later interaction is instant, and the API stays the only source of truth.
-  // Nothing about a swap is hardcoded in this file.
-  useEffect(() => {
-    let cancelled = false;
-    fetch('/graphql', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json', 'x-api-key': 'dev-key' },
-      body: JSON.stringify({ query: PANTRY_QUERY }),
-    })
-      .then((r) => r.json())
-      .then((j) => {
-        if (cancelled) return;
-        type RawEdge = {
-          node: { canonicalName: string };
-          ratio: { amount: number; basis: string; note: string | null };
-          preservesRoles: string[];
-          losesRoles: string[];
-          validFor: {
-            techniques: string[]; excludedTechniques: string[];
-            dishTypes: string[]; excludedDishTypes: string[];
-          } | null;
-          effects: Sub['eff'];
-          adjustments: Sub['adj'];
-          reliability: string;
-        };
-        type RawIng = {
-          id: string; canonicalName: string; roles: string[];
-          substitutions: { edges: RawEdge[] };
-        };
-
-        const rows: RawIng[] = j?.data?.ingredients ?? [];
-        const mapped: Ing[] = rows.map((r) => ({
-          id: r.id,
-          name: r.canonicalName,
-          roles: r.roles ?? [],
-          subs: (r.substitutions?.edges ?? []).map((e) => ({
-            to: e.node.canonicalName,
-            amount: e.ratio.amount,
-            basis: e.ratio.basis === 'WEIGHT' ? 'by weight' : 'by volume',
-            note: e.ratio.note,
-            keeps: e.preservesRoles ?? [],
-            loses: e.losesRoles ?? [],
-            ok: [...(e.validFor?.techniques ?? []), ...(e.validFor?.dishTypes ?? [])],
-            no: [...(e.validFor?.excludedTechniques ?? []), ...(e.validFor?.excludedDishTypes ?? [])],
-            eff: e.effects ?? [],
-            adj: e.adjustments ?? [],
-            rel: e.reliability,
-          })),
-        }));
-        mapped.sort((a, b) => {
-          const ia = ORDER.indexOf(a.id);
-          const ib = ORDER.indexOf(b.id);
-          return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
-        });
-        setPantry(mapped);
-      })
-      .catch(() => {
-        if (!cancelled) setPantry([]);
-      });
-    return () => { cancelled = true; };
-  }, []);
 
   // The wordmark letters swapping into ingredient names.
   useEffect(() => {
@@ -239,16 +107,18 @@ export default function App() {
 
   useEffect(() => () => { if (flipTimer.current) clearTimeout(flipTimer.current); }, []);
 
-  const current = useMemo(() => pantry.find((p) => p.id === ing), [pantry, ing]);
-  const matches = useCallback((s: Sub) => sit === 'ANY' || s.ok.includes(sit), [sit]);
-  const results = useMemo(() => (current?.subs ?? []).filter(matches), [current, matches]);
+  const current = useMemo(() => PANTRY.find((p) => p.id === ing), [ing]);
+  const results = useMemo(
+    () => (current?.subs ?? []).filter((s) => sit === 'ANY' || s.ok.includes(sit)),
+    [current, sit],
+  );
 
   const sitLabel = useMemo(() => {
     for (const g of SITS) for (const it of g.items) if (it[0] === sit) return it[1];
     return '';
   }, [sit]);
   const sitGroupIdx = useMemo(() => SITS.findIndex((g) => g.items.some((x) => x[0] === sit)), [sit]);
-  const phrase = sit === 'ANY' ? 'anywhere' : (sitGroupIdx === 3 ? `when ${sitLabel}` : `in ${sitLabel}`);
+  const phrase = sit === 'ANY' ? 'anywhere' : (sitGroupIdx === TECHNIQUE_GROUP ? `when ${sitLabel}` : `in ${sitLabel}`);
   const failsHere = sit !== 'ANY' && (current?.subs ?? []).some((s) => s.no.includes(sit));
   const lowerName = (current?.name ?? '').toLowerCase();
 
@@ -335,7 +205,7 @@ export default function App() {
               </span>
             </div>
             <div className="chiprow last">
-              {pantry.map((p) => {
+              {PANTRY.map((p) => {
                 const works = p.subs.filter((s) => sit === 'ANY' || s.ok.includes(sit)).length;
                 const fails = sit !== 'ANY' && p.subs.some((s) => s.no.includes(sit));
                 return (
@@ -355,8 +225,8 @@ export default function App() {
                 {results.length
                   ? `Instead of ${lowerName}, ${phrase}`
                   : sit === 'ANY'
-                    ? `Nothing recorded for ${lowerName}`
-                    : `No ${lowerName} swap is verified ${phrase}`}
+                    ? `Nothing on file for ${lowerName}`
+                    : `No ${lowerName} swap works ${phrase}`}
               </h2>
               <span className="results-count">{results.length} {results.length === 1 ? 'swap' : 'swaps'}</span>
             </div>
@@ -391,23 +261,22 @@ export default function App() {
                     <div className="swap-body">
                       <div className="ratio-row">
                         <span className="ratio-n">{r.amount}&times;</span>
-                        <span className="ratio-b">{r.basis}</span>
+                        <span className="ratio-b">{r.basis === 'WEIGHT' ? 'by weight' : 'by volume'}</span>
                         <span className={`rel ${r.rel.toLowerCase()}`}>{r.rel.toLowerCase()}</span>
                       </div>
                       {r.note && <p className="swap-note">{r.note}</p>}
                       <div className="roletags">
-                        {r.keeps.map((k) => <span key={k} className="roletag keeps">keeps {human(k)}</span>)}
-                        {r.loses.map((l) => <span key={l} className="roletag loses">loses {human(l)}</span>)}
+                        {r.keeps.map((k) => <span key={k} className="roletag keeps">keeps {k}</span>)}
+                        {r.loses.map((l) => <span key={l} className="roletag loses">loses {l}</span>)}
                       </div>
-                      {r.eff.map((e) => (
-                        <p key={e.dimension} className="eff">
-                          <b>{sentence(e.dimension)} {human(e.direction)}{e.note ? ` ${EM}` : ''}</b> {e.note}
+                      {(r.eff ?? []).map(([dim, dir, note]) => (
+                        <p key={dim} className="eff">
+                          <b>{sentence(dim)} {dir}{note ? ` ${EM}` : ''}</b> {note}
                         </p>
                       ))}
-                      {r.adj.map((a) => (
-                        <p key={a.action} className="adj">
-                          <b>{sentence(a.action)} {EM} </b>
-                          {[a.amount, a.reason].filter(Boolean).join(` ${EM} `)}
+                      {(r.adj ?? []).map(([what, detail]) => (
+                        <p key={what} className="adj">
+                          <b>{sentence(what)} {EM} </b>{detail}
                         </p>
                       ))}
                     </div>
@@ -417,11 +286,11 @@ export default function App() {
             ) : (
               <div className="empty-state">
                 <div className="empty-mark">{EM}</div>
-                <h3>{failsHere ? 'Known to fail here.' : 'No verified substitution.'}</h3>
+                <h3>{failsHere ? 'Known to fail here.' : 'Nothing on file.'}</h3>
                 <p>
                   {failsHere
-                    ? 'This is recorded as a failure, not a gap. Every other food API would still hand you an answer and ruin the dish.'
-                    : 'We have not tested this combination. Saying nothing beats guessing.'}
+                    ? 'This one is on record as a bad idea, not a gap. Most swap lists would still hand you something and ruin the dish.'
+                    : 'No swap is recorded for this combination. Saying nothing beats guessing.'}
                 </p>
               </div>
             )}
@@ -433,23 +302,23 @@ export default function App() {
           <div className="screen-head head-sm" style={{ maxWidth: '46ch' }}>
             <div className="blob blob-leaf" style={{ right: -300, top: -80, width: 260, height: 260 }} />
             <p className="kicker" style={{ position: 'relative', zIndex: 1 }}>The pantry</p>
-            <h1>Eleven ingredients, twenty one verified swaps.</h1>
-            <p>Every edge was written by hand because context changes the answer. Pick one to see where it can go.</p>
+            <h1>{PANTRY.length} ingredients, {TOTAL_SWAPS} swaps.</h1>
+            <p>Every swap says where it works and where it fails, because the situation changes the answer. Pick one to see where it can go.</p>
           </div>
           <div className="grid-pantry">
-            {pantry.map((p) => (
+            {PANTRY.map((p) => (
               <button key={p.id} className="tile pantry"
                 onClick={() => { setIng(p.id); setSit('ANY'); setTab(0); setScreen('home'); stage(); window.scrollTo(0, 0); }}>
                 <span className="tile-name">
                   <Pepper size={17} style={{ flex: 'none' }} />
                   <strong>{p.name}</strong>
                 </span>
-                <span className="tile-role">{p.roles.slice(0, 3).map(human).join(` ${MIDDOT} `)}</span>
+                <span className="tile-role">{p.roles.slice(0, 3).join(` ${MIDDOT} `)}</span>
                 <span className="tile-tos">
                   {[...new Set(p.subs.map((s) => s.to))].slice(0, 3).map((t) => <span key={t}>{t}</span>)}
                 </span>
                 <span className="tile-go">
-                  {p.subs.length} {p.subs.length === 1 ? 'verified swap' : 'verified swaps'} &rarr;
+                  {p.subs.length} {p.subs.length === 1 ? 'swap' : 'swaps'} &rarr;
                 </span>
               </button>
             ))}
@@ -469,12 +338,6 @@ export default function App() {
               <div className="grid-docs">
                 {g.items.map((d) => (
                   <button key={d.id} className="tile doc" onClick={() => openDoc(d)}>
-                    <span className="docmark">
-                      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M12 7v14" />
-                        <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z" />
-                      </svg>
-                    </span>
                     <span className="doc-kicker">{d.kicker}</span>
                     <span className="doc-title">{d.title}</span>
                     <span className="doc-sum">{d.summary}</span>
@@ -540,7 +403,7 @@ export default function App() {
           </div>
 
           <p className="curtain-line">
-            Twenty one substitutions that know where they work, and say nothing where they do not.
+            {TOTAL_SWAPS} swaps that know where they work, and say nothing where they do not.
           </p>
 
           <div className="enter-wrap">
