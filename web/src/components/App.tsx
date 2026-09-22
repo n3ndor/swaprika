@@ -4,6 +4,7 @@ import { EM, MIDDOT, SwapCard, sentence } from './SwapCard';
 import HowItWorks from './HowItWorks';
 import { INGREDIENTS, INGREDIENT_GROUPS, SITUATIONS, SWAPS, type Swap } from '../data/swaps';
 import { FAIL_WHY, whyKey } from '../data/why';
+import { DEFAULT_PICKS, pickScenarios } from '../data/scenarios';
 
 type Screen = 'home' | 'browse' | 'how';
 
@@ -38,19 +39,6 @@ const groupOf = (code: string) => SITS.findIndex((g) => g.items.some((x) => x[0]
 const making = (code: string) =>
   groupOf(code) === TECHNIQUE_GROUP ? sentence(labelOf(code)) : `Making ${labelOf(code)}`;
 
-/** Ready made questions, so a first visit starts from a real situation. */
-const SCENARIOS: { text: string; sit: string; ing: string }[] = [
-  { text: 'Pancakes, but no buttermilk', sit: 'PANCAKE', ing: 'buttermilk' },
-  { text: 'Brownies, but no eggs', sit: 'BROWNIES', ing: 'egg' },
-  { text: 'Pasta sauce, but no cream', sit: 'PASTA_SAUCE', ing: 'heavy-cream' },
-  { text: 'A curry, but no coconut milk', sit: 'CURRY', ing: 'coconut-milk' },
-  { text: 'Pizza dough, but no dry yeast', sit: 'PIZZA', ing: 'yeast' },
-  { text: 'Pesto, but no pine nuts', sit: 'PESTO', ing: 'pine-nuts' },
-  { text: 'Cheesecake, but no cream cheese', sit: 'CHEESECAKE', ing: 'cream-cheese' },
-  { text: 'A stir fry, but no soy sauce', sit: 'STIR_FRY', ing: 'soy-sauce' },
-  { text: 'Croissants, but no butter', sit: 'CROISSANT', ing: 'butter' },
-];
-
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home');
   const [gone, setGone] = useState(false);
@@ -58,6 +46,10 @@ export default function App() {
   const [tab, setTab] = useState(1);
   const [ing, setIng] = useState('butter');
   const [showAll, setShowAll] = useState(false);
+  // The server renders a fixed set so the HTML is stable; a random set is drawn
+  // as soon as the page runs, which happens behind the cover.
+  const [picks, setPicks] = useState(DEFAULT_PICKS);
+  useEffect(() => setPicks(pickScenarios()), []);
   // `revealed` is the automatic reveal that plays once the cards are on screen.
   // `manual` records every card the visitor has flipped by hand, and wins.
   const [revealed, setRevealed] = useState(false);
@@ -232,9 +224,12 @@ export default function App() {
             </div>
             <div className="tryrow">
               <span className="tryrow-label">Try one:</span>
-              {SCENARIOS.map((s) => (
+              {picks.map((s) => (
                 <button key={s.text} className="scenario" onClick={() => jump(s.sit, s.ing)}>{s.text}</button>
               ))}
+              <button className="reroll" onClick={() => setPicks(pickScenarios())} title="Show other examples">
+                &#8635; Other examples
+              </button>
             </div>
           </div>
 
