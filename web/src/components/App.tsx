@@ -54,16 +54,31 @@ export default function App() {
   // `manual` records every card the visitor has flipped by hand, and wins.
   const [revealed, setRevealed] = useState(false);
   const [manual, setManual] = useState<Record<number, boolean>>({});
-  const [letter, setLetter] = useState(0);
+  // -1 means no letter is expanded, so the cover opens on the plain name.
+  const [letter, setLetter] = useState(-1);
 
   const resultsEl = useRef<HTMLElement | null>(null);
   const flipTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // The wordmark letters swapping into ingredient names.
+  // The wordmark first shows the plain name for two seconds, so people read
+  // "Swaprika" before the letters start swapping into ingredients. It starts
+  // over every time the cover comes back, and rests while the cover is away.
   useEffect(() => {
-    const t = setInterval(() => setLetter((n) => (n + 1) % WORD.length), 1700);
-    return () => clearInterval(t);
-  }, []);
+    if (gone) return;
+    setLetter(-1);
+    let iv: ReturnType<typeof setInterval> | undefined;
+    const hold = setTimeout(() => {
+      setLetter(0);
+      iv = setInterval(() => setLetter((n) => (n + 1) % WORD.length), 1700);
+    }, 2000);
+    return () => { clearTimeout(hold); if (iv) clearInterval(iv); };
+  }, [gone]);
+
+  // No scrollbar while the cover is up. The class is also set in the static
+  // HTML, so the scrollbar never flashes before the page runs.
+  useEffect(() => {
+    document.documentElement.classList.toggle('cover-on', !gone);
+  }, [gone]);
 
   // A link to #find, #pantry or #how skips the curtain.
   useEffect(() => {
@@ -430,7 +445,7 @@ export default function App() {
         </div>
 
         <a className="curtain-credit" href="https://nagysolution.com" target="_blank" rel="noopener noreferrer">
-          A Nagy Solution project &#8599;
+          Swaprika, a Nagy Solution project &#8599;
         </a>
       </div>
     </div>

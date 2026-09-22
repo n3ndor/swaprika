@@ -22,6 +22,7 @@
 }
 
 [data-gone='1'] { transform: translateY(-102%); }
+html.cover-on, html.cover-on body { overflow: hidden; }
 
 @keyframes swf   { 0%,100% { transform: translate(0,0) rotate(0deg); }   50% { transform: translate(14px,-22px) rotate(6deg); } }
 @keyframes swf2  { 0%,100% { transform: translate(0,0) rotate(0deg); }   50% { transform: translate(-18px,16px) rotate(-8deg); } }
