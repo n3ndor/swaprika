@@ -158,7 +158,7 @@
 .curtain-tag { font-size: 11.5px; letter-spacing: .32em; text-transform: uppercase; color: #f3b9a2; margin: 0 0 26px; }
 /* Never wrap. The widest moment is "Sw" + "heat flour" + "aprika", about 10.5em
    in Caprasimo, so the size is capped to keep that inside the viewport. */
-.wordmark { font-family: var(--font-heading); font-size: clamp(26px, 7.2vw, 96px); line-height: 1; letter-spacing: -.02em; display: flex; flex-wrap: nowrap; white-space: nowrap; justify-content: center; align-items: baseline; margin-bottom: 8px; }
+.wordmark { font-family: var(--font-heading); font-size: clamp(24px, 7.2vw, 96px); line-height: 1; letter-spacing: -.02em; display: flex; flex-wrap: nowrap; white-space: nowrap; justify-content: center; align-items: baseline; margin-bottom: 8px; }
 .wordmark > span { flex: none; }
 .wordmark .tail { display: inline-block; overflow: hidden; white-space: nowrap; text-transform: none; overflow-clip-margin: 0.2em; padding-bottom: 0.08em; vertical-align: -0.18em; color: #f0b07a; transition: max-width .6s cubic-bezier(.65,0,.35,1), opacity .35s ease; }
 .curtain-line { font-size: clamp(15px, 2vw, 19px); line-height: 1.6; max-width: 44ch; margin: 22px auto 0; color: #f2d6c9; }
