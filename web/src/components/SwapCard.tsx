@@ -24,6 +24,7 @@ export function SwapCard({
   delay = '0ms',
   onFlip,
   annotate = false,
+  avoid = [],
   style,
 }: {
   swap: Swap;
@@ -33,6 +34,8 @@ export function SwapCard({
   onFlip: () => void;
   /** Numbered markers for the How it works page. */
   annotate?: boolean;
+  /** Where this swap is recorded as failing, already phrased for people. */
+  avoid?: string[];
   style?: CSSProperties;
 }) {
   const rel = REL[swap.rel];
@@ -86,6 +89,9 @@ export function SwapCard({
           {swap.keeps.map((k) => <span key={k} className="roletag keeps">keeps {k}</span>)}
           {swap.loses.map((l) => <span key={l} className="roletag loses">loses {l}</span>)}
         </div>
+        {avoid.length > 0 && (
+          <p className="avoid"><b>Not for</b> {avoid.join(', ')}</p>
+        )}
         {(swap.eff ?? []).map(([dim, dir, note], i) => (
           <p key={dim} className="eff">
             {i === 0 && <Mark n={5} on={annotate} />}

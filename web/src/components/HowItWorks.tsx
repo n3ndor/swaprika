@@ -68,7 +68,8 @@ export default function HowItWorks({ onTry }: { onTry: Try }) {
         <h2>How to read a card</h2>
         <div className="anatomy">
           <div className="anatomy-card">
-            <SwapCard swap={sample} fromName="Butter" flipped={flipped} onFlip={() => setFlipped((f) => !f)} annotate />
+            <SwapCard swap={sample} fromName="Butter" flipped={flipped} onFlip={() => setFlipped((f) => !f)} annotate
+              avoid={sample.no.map((c) => SITUATIONS.flatMap((g) => g.items).find((x) => x[0] === c)?.[1] ?? c)} />
           </div>
           <ol className="anatomy-list">
             <li><b>The flip.</b> What you had on one side, what to use on the other. The arrow turns it back and forth.</li>
@@ -79,7 +80,7 @@ export default function HowItWorks({ onTry }: { onTry: Try }) {
               <span className="rel situational">{REL.SITUATIONAL.label}</span> {REL.SITUATIONAL.hint}{' '}
               <span className="rel contested">{REL.CONTESTED.label}</span> {REL.CONTESTED.hint}
             </li>
-            <li><b>What it keeps and loses.</b> Every ingredient does jobs in a dish. This shows which jobs survive the swap. The loses list is usually the one that matters.</li>
+            <li><b>What it keeps and loses.</b> Every ingredient does jobs in a dish. This shows which jobs survive the swap. The loses list is usually the one that matters. Underneath, <b>Not for</b> lists the dishes where the swap is known to fail.</li>
             <li><b>What changes.</b> Flavour, texture, rise, browning and colour, described in words rather than scores.</li>
             <li><b>What to adjust.</b> The fix that makes the swap work, such as putting water back or lowering the oven.</li>
           </ol>

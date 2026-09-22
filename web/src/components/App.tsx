@@ -3,6 +3,7 @@ import { Pepper } from './Pepper';
 import { EM, MIDDOT, SwapCard, sentence } from './SwapCard';
 import HowItWorks from './HowItWorks';
 import { INGREDIENTS, INGREDIENT_GROUPS, SITUATIONS, SWAPS, type Swap } from '../data/swaps';
+import { FAIL_WHY, whyKey } from '../data/why';
 
 type Screen = 'home' | 'browse' | 'how';
 
@@ -301,6 +302,7 @@ export default function App() {
                       flipped={flippedAt(i)}
                       delay={delayAt(i)}
                       onFlip={() => flip(i)}
+                      avoid={r.no.map(labelOf)}
                       style={{ animationDelay: `${i * 90}ms` }}
                     />
                   ))}
@@ -319,8 +321,7 @@ export default function App() {
                     <ul className="fail-list">
                       {failing.map((s) => (
                         <li key={s.to}>
-                          <b>{s.to}</b>{' '}
-                          {s.loses.length ? `loses the ${s.loses.join(' and the ')}` : (s.eff?.[0]?.[2] ?? '')}
+                          <b>{s.to}.</b> {FAIL_WHY[whyKey(s.from, s.to)]}
                         </li>
                       ))}
                     </ul>
