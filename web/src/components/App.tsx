@@ -7,10 +7,16 @@ import { DEFAULT_PICKS, pickScenarios } from '../data/scenarios';
 
 type Screen = 'home' | 'browse' | 'how';
 
+/**
+ * Each letter of the name opens into an ingredient from the pantry. The tails
+ * are chosen so they never repeat the letters around them: "paprika" read as
+ * "Swapaprikarika". The "i" stays plain, nothing fits it well.
+ */
 const WORD: [string, string][] = [
-  ['S', 'ugar'], ['w', 'heat flour'], ['a', 'quafaba'], ['p', 'aprika'],
-  ['r', 'icotta'], ['i', 'ce water'], ['k', 'efir'], ['a', 'pplesauce'],
+  ['S', 'ugar'], ['w', 'heat flour'], ['a', 'quafaba'], ['p', 'armesan'],
+  ['r', 'ed wine'], ['i', ''], ['k', 'efir'], ['a', 'pplesauce'],
 ];
+const ROTATION = WORD.map(([, tail], i) => (tail ? i : -1)).filter((i) => i >= 0);
 
 interface Ing {
   id: string;
@@ -75,8 +81,11 @@ export default function App() {
     setLetter(-1);
     let iv: ReturnType<typeof setInterval> | undefined;
     const hold = setTimeout(() => {
-      setLetter(0);
-      iv = setInterval(() => setLetter((n) => (n + 1) % WORD.length), 1700);
+      setLetter(ROTATION[0]);
+      iv = setInterval(
+        () => setLetter((n) => ROTATION[(ROTATION.indexOf(n) + 1) % ROTATION.length]),
+        1700,
+      );
     }, 2000);
     return () => { clearTimeout(hold); if (iv) clearInterval(iv); };
   }, [gone]);
