@@ -87,7 +87,8 @@
 .face-a small { opacity: .65; }
 .face-b { background: var(--paprika); color: #fff; transform: rotateX(180deg); }
 .face-b small { opacity: .75; }
-.swapbadge { position: absolute; right: 18px; top: 50%; margin-top: -18px; width: 36px; height: 36px; border-radius: 999px; display: flex; align-items: center; justify-content: center; transition: all .5s ease; }
+.swapbadge { position: absolute; right: 18px; top: 50%; margin-top: -18px; width: 36px; height: 36px; border-radius: 999px; display: flex; align-items: center; justify-content: center; transition: all .5s ease; border: 0; padding: 0; cursor: pointer; font: inherit; z-index: 1; }
+.swapbadge:hover { box-shadow: 0 0 0 5px color-mix(in srgb, var(--paprika) 22%, transparent); }
 .swap-body { padding: 16px 22px 0; }
 .ratio-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
 .ratio-n { font-family: var(--font-heading); font-size: 30px; color: var(--paprika-deep); }

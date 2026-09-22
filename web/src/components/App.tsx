@@ -39,7 +39,10 @@ export default function App() {
   const [sit, setSit] = useState('CAKE');
   const [tab, setTab] = useState(1);
   const [ing, setIng] = useState('butter');
-  const [flipped, setFlipped] = useState(false);
+  // `revealed` is the automatic reveal that plays once the cards are on screen.
+  // `manual` records every card the visitor has flipped by hand, and wins.
+  const [revealed, setRevealed] = useState(false);
+  const [manual, setManual] = useState<Record<number, boolean>>({});
   const [letter, setLetter] = useState(0);
 
   const resultsEl = useRef<HTMLElement | null>(null);
@@ -75,13 +78,14 @@ export default function App() {
     const vis = Math.min(r.bottom, vh) - Math.max(r.top, 0);
     if (vis > 0 && vis >= Math.min(r.height, vh) * 0.4) {
       if (flipTimer.current) clearTimeout(flipTimer.current);
-      flipTimer.current = setTimeout(() => setFlipped(true), 1200);
+      flipTimer.current = setTimeout(() => setRevealed(true), 1200);
     }
   }, [gone]);
 
   const stage = useCallback(() => {
     if (flipTimer.current) clearTimeout(flipTimer.current);
-    setFlipped(false);
+    setRevealed(false);
+    setManual({});
     setTimeout(maybeStart, 60);
   }, [maybeStart]);
 
@@ -113,9 +117,16 @@ export default function App() {
   const enter = useCallback(() => {
     if (flipTimer.current) clearTimeout(flipTimer.current);
     setGone(true);
-    setFlipped(false);
+    setRevealed(false);
+    setManual({});
     setTimeout(maybeStart, 950);
   }, [maybeStart]);
+
+  const flippedAt = (i: number) => (i in manual ? manual[i] : revealed);
+  // The staggered delay belongs to the automatic reveal only. A card flipped by
+  // hand turns immediately, in both directions.
+  const delayAt = (i: number) => (i in manual ? '0ms' : `${i * 260}ms`);
+  const flip = (i: number) => setManual((m) => ({ ...m, [i]: !(i in m ? m[i] : revealed) }));
 
   const toCover = useCallback(() => {
     setGone(false);
@@ -219,7 +230,7 @@ export default function App() {
                 {results.map((r, i) => (
                   <article key={`${r.to}-${i}`} className="swap" style={{ animationDelay: `${i * 90}ms` }}>
                     <div className="strip-outer">
-                      <div className="strip" style={{ transform: `rotateX(${flipped ? -180 : 0}deg)`, transitionDelay: `${i * 260}ms` }}>
+                      <div className="strip" style={{ transform: `rotateX(${flippedAt(i) ? -180 : 0}deg)`, transitionDelay: delayAt(i) }}>
                         <div className="face face-a">
                           <small>you had</small>
                           <strong>{current?.name}</strong>
@@ -229,16 +240,24 @@ export default function App() {
                           <strong>{r.to}</strong>
                         </div>
                       </div>
-                      <div className="swapbadge" style={{
-                        background: flipped ? 'rgba(251,234,222,.22)' : 'var(--paprika)',
-                        color: flipped ? 'var(--curtain-ink)' : '#fff',
-                        transform: `rotate(${flipped ? 180 : 0}deg)`,
-                        transitionDelay: `${i * 260}ms`,
-                      }}>
+                      <button
+                        type="button"
+                        className="swapbadge"
+                        aria-pressed={flippedAt(i)}
+                        aria-label={flippedAt(i) ? `Show ${current?.name ?? 'the original'} again` : `Show ${r.to}`}
+                        title="Flip the card"
+                        onClick={() => flip(i)}
+                        style={{
+                          background: flippedAt(i) ? 'rgba(251,234,222,.22)' : 'var(--paprika)',
+                          color: flippedAt(i) ? 'var(--curtain-ink)' : '#fff',
+                          transform: `rotate(${flippedAt(i) ? 180 : 0}deg)`,
+                          transitionDelay: delayAt(i),
+                        }}
+                      >
                         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <path d="M16 3h5v5" /><path d="M21 3 9 15" /><path d="M8 21H3v-5" /><path d="M3 21 15 9" />
                         </svg>
-                      </div>
+                      </button>
                     </div>
 
                     <div className="swap-body">
