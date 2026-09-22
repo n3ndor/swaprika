@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/organic-14bedc12-96cc-4c1d-bb49-51109bd75ef4/styles.css">
+<script src="_ds/organic-14bedc12-96cc-4c1d-bb49-51109bd75ef4/_ds_bundle.js"></script>
+<style>
+:root{--paprika:#d8402f;--paprika-deep:#a82d1f;--paprika-ink:#6e1b12}
+[data-gone="1"]{transform:translateY(-102%)}
+@keyframes swf{0%,100%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(14px,-22px) rotate(6deg)}}
+@keyframes swf2{0%,100%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(-18px,16px) rotate(-8deg)}}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes sway{0%,100%{transform:rotate(-4deg) translateY(0)}50%{transform:rotate(4deg) translateY(-10px)}}
+@keyframes wag{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(11deg)}}
+@keyframes drift{0%{transform:translate(0,0) rotate(0deg)}50%{transform:translate(26px,-34px) rotate(14deg)}100%{transform:translate(0,0) rotate(0deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:var(--color-bg);color:var(--color-text);font-family:var(--font-body);position:relative;overflow-x:hidden">
+
+  <div style="position:relative;z-index:1">
+    <div style="position:sticky;top:0;z-index:30;background:color-mix(in srgb, var(--color-bg) 88%, transparent);backdrop-filter:blur(10px)">
+      <div style="max-width:1080px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:28px">
+        <button onClick="{{ goHome }}" style="background:none;border:0;padding:0;cursor:pointer;display:flex;align-items:center;gap:9px;font-family:var(--font-heading);font-size:21px;color:var(--color-text);margin-right:auto">
+          <svg viewBox="0 0 120 140" width="24" height="28" aria-hidden="true" style="overflow:visible">
+            <path d="M57,42 L57,13 Q60,4 63,13 L63,42 Z" fill="#3f7d34"></path>
+            <path d="M63,17 Q86,6 92,20 Q75,31 63,22 Z" fill="#5aa64c" style="transform-origin:63px 19px;animation:wag 3.6s ease-in-out infinite"></path>
+            <path d="M60,36 C72,36 80,45 80,61 C80,85 76,110 70,129 C68,134 64,134 63,129 C58,110 46,88 44,66 C43,48 49,36 60,36 Z" fill="var(--paprika)"></path><ellipse cx="60" cy="40" rx="11" ry="5" fill="#3f7d34"></ellipse>
+          </svg>
+          <span style="display:flex;align-items:baseline;gap:1px"><span>swap</span><span style="color:var(--paprika-deep)">rika</span></span>
+        </button>
+        <nav style="display:flex;gap:22px;align-items:center;font-size:14px">
+          <button onClick="{{ goHome }}" style="background:none;border:0;padding:4px 0;cursor:pointer;font:inherit;color:{{ navHome }}">Find a swap</button>
+          <button onClick="{{ goBrowse }}" style="background:none;border:0;padding:4px 0;cursor:pointer;font:inherit;color:{{ navBrowse }}">Ingredients</button>
+          <button onClick="{{ goDocs }}" style="background:none;border:0;padding:4px 0;cursor:pointer;font:inherit;color:{{ navDocs }}">Documents</button>
+          <sc-if value="{{ showDev }}" hint-placeholder-val="{{ true }}">
+            <a href="#" style="font-size:13px;color:color-mix(in srgb, var(--color-text) 50%, transparent);text-decoration:none">For developers ↗</a>
+          </sc-if>
+          <span style="width:1px;height:20px;background:var(--color-divider)"></span>
+          <button onClick="{{ toCover }}" title="Back to the cover" style="background:none;border:1px solid var(--color-divider);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;font-size:13px;color:color-mix(in srgb, var(--color-text) 62%, transparent);transition:all .2s ease" style-hover="border-color:var(--paprika);color:var(--paprika-deep)">↑ Cover</button>
+          <button style="background:var(--paprika);border:1px solid var(--paprika);border-radius:999px;padding:6px 16px;cursor:pointer;font:inherit;font-size:13px;color:#fff;transition:background .2s ease" style-hover="background:var(--paprika-deep)">Sign in</button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- ══ FIND A SWAP ══ -->
+    <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+      <main style="max-width:1080px;margin:0 auto;padding:40px 24px 90px">
+        <header style="position:relative;margin-bottom:34px">
+          <div style="position:absolute;right:-40px;top:-70px;width:280px;height:280px;border-radius:999px;background:var(--color-accent-2-200);opacity:.55;z-index:0"></div>
+          <svg viewBox="0 0 120 140" width="120" height="140" aria-hidden="true" style="position:absolute;right:30px;top:-46px;z-index:0;overflow:visible;animation:sway 7s ease-in-out infinite">
+            <path d="M57,42 L57,13 Q60,4 63,13 L63,42 Z" fill="#3f7d34"></path>
+            <path d="M63,17 Q86,6 92,20 Q75,31 63,22 Z" fill="#5aa64c" style="transform-origin:63px 19px;animation:wag 4.4s ease-in-out infinite"></path>
+            <path d="M60,36 C72,36 80,45 80,61 C80,85 76,110 70,129 C68,134 64,134 63,129 C58,110 46,88 44,66 C43,48 49,36 60,36 Z" fill="var(--paprika)"></path>
+            <ellipse cx="60" cy="40" rx="11" ry="5" fill="#3f7d34"></ellipse>
+            <ellipse cx="56" cy="68" rx="5" ry="16" fill="#ffffff" opacity="0.22" transform="rotate(-8 56 68)"></ellipse>
+          </svg>
+          <svg viewBox="0 0 120 140" width="54" height="63" aria-hidden="true" style="position:absolute;right:190px;top:110px;z-index:0;opacity:.28;animation:drift 19s ease-in-out infinite 3s">
+            <path d="M57,42 L57,13 Q60,4 63,13 L63,42 Z" fill="#5aa64c"></path>
+            <path d="M60,36 C72,36 80,45 80,61 C80,85 76,110 70,129 C68,134 64,134 63,129 C58,110 46,88 44,66 C43,48 49,36 60,36 Z" fill="#7a8a5e"></path>
+          </svg>
+          <div style="position:relative;z-index:1;max-width:46ch">
+            <p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--paprika-deep);margin:0 0 14px">Start with the situation</p>
+            <h1 style="font-family:var(--font-heading);font-size:clamp(36px,5.4vw,60px);line-height:1.02;margin:0 0 16px">A swap is only true somewhere.</h1>
+            <p style="font-size:16.5px;line-height:1.65;color:color-mix(in srgb, var(--color-text) 68%, transparent);margin:0;max-width:50ch">Butter becomes oil in a cake and ruins a croissant. Tell us where you are cooking, then what ran out.</p>
+          </div>
+        </header>
+
+        <section style="background:var(--color-surface);border-radius:40px;padding:30px 32px 34px;margin-bottom:46px;box-shadow:var(--shadow-sm)">
+          <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px">
+            <span style="width:24px;height:24px;border-radius:999px;background:var(--paprika);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex:none">1</span>
+            <h2 style="font-family:var(--font-heading);font-size:21px;margin:0">Where are you cooking?</h2>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:var(--color-bg);width:fit-content;margin:0 0 18px 36px">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+              <button onClick="{{ t.pick }}" style="{{ t.style }}">{{ t.name }}</button>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:9px;margin:0 0 30px 36px">
+            <sc-for list="{{ sitItems }}" as="s" hint-placeholder-count="8">
+              <button onClick="{{ s.pick }}" style="{{ s.style }}" style-hover="border-color:var(--paprika);color:var(--paprika-deep)">{{ s.label }}</button>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:16px">
+            <span style="width:24px;height:24px;border-radius:999px;background:var(--paprika);color:#fff;font-size:12px;display:inline-flex;align-items:center;justify-content:center;flex:none">2</span>
+            <h2 style="font-family:var(--font-heading);font-size:21px;margin:0">What ran out?</h2>
+            <span style="font-size:12.5px;color:color-mix(in srgb, var(--color-text) 48%, transparent)">{{ step2Hint }}</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:9px;margin-left:36px">
+            <sc-for list="{{ ingChips }}" as="c" hint-placeholder-count="9">
+              <button onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.label }}<span style="font-size:11px;opacity:.6;margin-left:7px">{{ c.hint }}</span></button>
+            </sc-for>
+          </div>
+        </section>
+
+        <section ref="{{ resultsRef }}">
+          <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--color-divider)">
+            <h2 style="font-family:var(--font-heading);font-size:22px;margin:0">{{ resultHeading }}</h2>
+            <span style="font-size:12.5px;color:color-mix(in srgb, var(--color-text) 50%, transparent)">{{ resultCount }}</span>
+          </div>
+
+          <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px">
+              <sc-for list="{{ results }}" as="r" hint-placeholder-count="3">
+                <article style="{{ r.card }}">
+                  <div style="{{ r.stripOuter }}">
+                    <div style="{{ r.strip }}">
+                      <div style="{{ r.faceA }}">
+                        <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.65">you had</span>
+                        <span style="font-family:var(--font-heading);font-size:24px;line-height:1.1">{{ r.fromName }}</span>
+                      </div>
+                      <div style="{{ r.faceB }}">
+                        <span style="font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.75">use instead</span>
+                        <span style="font-family:var(--font-heading);font-size:24px;line-height:1.1">{{ r.toName }}</span>
+                      </div>
+                    </div>
+                    <div style="{{ r.badge }}">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"></path><path d="M21 3 9 15"></path><path d="M8 21H3v-5"></path><path d="M3 21 15 9"></path></svg>
+                    </div>
+                  </div>
+                  <div style="padding:16px 22px 0">
+                    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px">
+                      <span style="font-family:var(--font-heading);font-size:30px;color:var(--paprika-deep)">{{ r.ratio }}</span>
+                      <span style="font-size:12.5px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ r.basis }}</span>
+                      <span style="{{ r.relStyle }}">{{ r.rel }}</span>
+                    </div>
+                    <sc-if value="{{ r.note }}" hint-placeholder-val="{{ true }}">
+                      <p style="font-size:13.5px;line-height:1.55;margin:0 0 12px;color:color-mix(in srgb, var(--color-text) 78%, transparent)">{{ r.note }}</p>
+                    </sc-if>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+                      <sc-for list="{{ r.keeps }}" as="k" hint-placeholder-count="1">
+                        <span style="font-size:11px;padding:3px 10px;border-radius:999px;background:#dcead2;color:#2f5f27">keeps {{ k }}</span>
+                      </sc-for>
+                      <sc-for list="{{ r.loses }}" as="l" hint-placeholder-count="2">
+                        <span style="font-size:11px;padding:3px 10px;border-radius:999px;background:#fbdcd6;color:var(--paprika-ink)">loses {{ l }}</span>
+                      </sc-for>
+                    </div>
+                    <sc-for list="{{ r.eff }}" as="e" hint-placeholder-count="0">
+                      <p style="font-size:13px;line-height:1.5;margin:0 0 6px;color:color-mix(in srgb, var(--color-text) 70%, transparent)"><b style="color:var(--color-text)">{{ e.head }}</b> {{ e.note }}</p>
+                    </sc-for>
+                    <sc-for list="{{ r.adj }}" as="a" hint-placeholder-count="0">
+                      <p style="font-size:13px;line-height:1.5;margin:10px 0 0;padding:9px 14px;border-radius:18px;background:#fdeae5;color:var(--paprika-ink)"><b>{{ a.head }}</b> {{ a.tail }}</p>
+                    </sc-for>
+                  </div>
+                </article>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1.5px dashed var(--color-neutral-400);border-radius:32px;padding:46px 30px;text-align:center;max-width:620px">
+              <div style="width:62px;height:62px;border-radius:999px;background:#fbdcd6;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-family:var(--font-heading);font-size:26px;color:var(--paprika-deep)">—</div>
+              <h3 style="font-family:var(--font-heading);font-size:24px;margin:0 0 8px">{{ emptyTitle }}</h3>
+              <p style="font-size:14.5px;line-height:1.6;margin:0 auto;max-width:46ch;color:color-mix(in srgb, var(--color-text) 65%, transparent)">{{ emptyBody }}</p>
+            </div>
+          </sc-if>
+        </section>
+      </main>
+    </sc-if>
+
+    <!-- ══ INGREDIENTS ══ -->
+    <sc-if value="{{ isBrowse }}" hint-placeholder-val="{{ false }}">
+      <main style="max-width:1080px;margin:0 auto;padding:40px 24px 90px">
+        <header style="position:relative;max-width:46ch;margin-bottom:32px">
+          <div style="position:absolute;right:-300px;top:-80px;width:260px;height:260px;border-radius:999px;background:#dcead2;opacity:.6;z-index:0"></div>
+          <p style="position:relative;z-index:1;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--paprika-deep);margin:0 0 10px">The pantry</p>
+          <h1 style="font-family:var(--font-heading);font-size:clamp(32px,4.2vw,46px);line-height:1.05;margin:0 0 12px">Eleven ingredients, twenty one verified swaps.</h1>
+          <p style="font-size:15.5px;line-height:1.6;color:color-mix(in srgb, var(--color-text) 68%, transparent);margin:0">Every edge was written by hand because context changes the answer. Pick one to see where it can go.</p>
+        </header>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">
+          <sc-for list="{{ pantry }}" as="p" hint-placeholder-count="8">
+            <button onClick="{{ p.open }}" style="text-align:left;cursor:pointer;background:var(--color-surface);border:1px solid transparent;border-radius:30px;padding:20px 22px;font:inherit;color:var(--color-text);display:flex;flex-direction:column;gap:10px;transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease" style-hover="transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--paprika)">
+              <span style="display:flex;align-items:center;gap:9px">
+                <svg viewBox="0 0 120 140" width="17" height="20" aria-hidden="true" style="flex:none">
+                  <path d="M57,42 L57,13 Q60,4 63,13 L63,42 Z" fill="#3f7d34"></path>
+                  <path d="M63,17 Q86,6 92,20 Q75,31 63,22 Z" fill="#5aa64c"></path>
+                  <path d="M60,36 C72,36 80,45 80,61 C80,85 76,110 70,129 C68,134 64,134 63,129 C58,110 46,88 44,66 C43,48 49,36 60,36 Z" fill="var(--paprika)"></path><ellipse cx="60" cy="40" rx="11" ry="5" fill="#3f7d34"></ellipse>
+                </svg>
+                <span style="font-family:var(--font-heading);font-size:22px;line-height:1.1">{{ p.name }}</span>
+              </span>
+              <span style="font-size:12.5px;color:color-mix(in srgb, var(--color-text) 55%, transparent)">{{ p.roleLine }}</span>
+              <span style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px">
+                <sc-for list="{{ p.tos }}" as="t" hint-placeholder-count="2">
+                  <span style="font-size:11px;padding:3px 10px;border-radius:999px;background:var(--color-bg);color:color-mix(in srgb, var(--color-text) 70%, transparent)">{{ t }}</span>
+                </sc-for>
+              </span>
+              <span style="font-size:12px;color:var(--paprika-deep);margin-top:4px">{{ p.countLine }} →</span>
+            </button>
+          </sc-for>
+        </div>
+      </main>
+    </sc-if>
+
+    <!-- ══ DOCUMENTS ══ -->
+    <sc-if value="{{ isDocs }}" hint-placeholder-val="{{ false }}">
+      <main style="max-width:1080px;margin:0 auto;padding:40px 24px 90px">
+        <header style="max-width:46ch;margin-bottom:30px">
+          <p style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--paprika-deep);margin:0 0 10px">Open by default</p>
+          <h1 style="font-family:var(--font-heading);font-size:clamp(32px,4.2vw,46px);line-height:1.05;margin:0 0 12px">Every document, in the open.</h1>
+          <p style="font-size:15.5px;line-height:1.6;color:color-mix(in srgb, var(--color-text) 68%, transparent);margin:0">The guide, the decisions behind the model, the schema and both licences. No account needed to read any of it.</p>
+        </header>
+        <sc-for list="{{ docGroups }}" as="dg" hint-placeholder-count="3">
+          <section style="margin-bottom:30px">
+            <p style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:color-mix(in srgb, var(--color-text) 45%, transparent);margin:0 0 12px">{{ dg.name }}</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px">
+              <sc-for list="{{ dg.items }}" as="d" hint-placeholder-count="3">
+                <button onClick="{{ d.open }}" style="text-align:left;cursor:pointer;background:var(--color-surface);border:1px solid transparent;border-radius:26px;padding:18px 20px;font:inherit;color:var(--color-text);display:flex;flex-direction:column;gap:7px;transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease" style-hover="transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--paprika)">
+                  <span style="width:34px;height:34px;border-radius:999px;background:#dcead2;color:var(--paprika-deep);display:flex;align-items:center;justify-content:center;margin-bottom:2px">
+                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path></svg>
+                  </span>
+                  <span style="font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--paprika-deep)">{{ d.kicker }}</span>
+                  <span style="font-family:var(--font-heading);font-size:17.5px;line-height:1.2">{{ d.title }}</span>
+                  <span style="font-size:13px;line-height:1.5;color:color-mix(in srgb, var(--color-text) 60%, transparent)">{{ d.summary }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </section>
+        </sc-for>
+      </main>
+    </sc-if>
+
+    <!-- ══ ONE DOCUMENT ══ -->
+    <sc-if value="{{ isDoc }}" hint-placeholder-val="{{ false }}">
+      <main style="max-width:1080px;margin:0 auto;padding:34px 24px 90px;display:grid;grid-template-columns:minmax(0,1fr);gap:30px">
+        <div>
+          <button onClick="{{ goDocs }}" style="background:none;border:0;padding:0;margin-bottom:22px;cursor:pointer;font:inherit;font-size:13.5px;color:var(--paprika-deep)">← All documents</button>
+          <article style="max-width:70ch">
+            <p style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--paprika-deep);margin:0 0 10px">{{ doc.kicker }}</p>
+            <h1 style="font-family:var(--font-heading);font-size:clamp(28px,3.6vw,40px);line-height:1.08;margin:0 0 26px">{{ doc.title }}</h1>
+            <sc-for list="{{ doc.blocks }}" as="b" hint-placeholder-count="4">
+              <section style="margin-bottom:26px">
+                <h2 style="font-family:var(--font-heading);font-size:19px;margin:0 0 10px">{{ b.h }}</h2>
+                <sc-for list="{{ b.ps }}" as="p" hint-placeholder-count="2">
+                  <p style="font-size:15.5px;line-height:1.7;margin:0 0 12px;color:color-mix(in srgb, var(--color-text) 80%, transparent)">{{ p }}</p>
+                </sc-for>
+                <sc-if value="{{ b.code }}" hint-placeholder-val="{{ false }}">
+                  <pre style="margin:4px 0 0;padding:16px 18px;border-radius:20px;background:var(--color-neutral-900);color:var(--color-neutral-200);font-size:12.5px;line-height:1.65;overflow-x:auto;font-family:ui-monospace,Menlo,monospace">{{ b.code }}</pre>
+                </sc-if>
+              </section>
+            </sc-for>
+          </article>
+        </div>
+      </main>
+    </sc-if>
+
+    <footer style="border-top:1px solid var(--color-divider);padding:26px 24px 40px">
+      <div style="max-width:1080px;margin:0 auto;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;font-size:12.5px;color:color-mix(in srgb, var(--color-text) 50%, transparent)">
+        <button onClick="{{ toCover }}" style="background:none;border:0;padding:0;cursor:pointer;font:inherit;font-size:12.5px;color:var(--paprika-deep)">↑ Back to the cover</button>
+        <span>Swaprika · context aware ingredient substitution</span>
+        <span>Code MIT · Data CC BY-NC-SA 4.0</span>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ══ ENTER CURTAIN ══ -->
+  <div data-gone="{{ gone }}" style="position:fixed;inset:0;z-index:60;background:#8f2c1b;color:#fbeade;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;overflow:hidden;transition:transform .9s cubic-bezier(.76,0,.24,1)">
+    <div style="position:absolute;width:460px;height:460px;border-radius:999px;background:#a3351f;left:-150px;top:-130px;animation:swf 13s ease-in-out infinite"></div>
+    <div style="position:absolute;width:330px;height:330px;border-radius:999px;background:#7a2415;right:-95px;bottom:-115px;animation:swf2 17s ease-in-out infinite"></div>
+    <div style="position:absolute;width:170px;height:170px;border-radius:999px;border:1px solid rgba(251,234,222,.18);right:15%;top:13%;animation:swf 11s ease-in-out infinite"></div>
+    <svg viewBox="0 0 120 140" width="64" height="75" aria-hidden="true" style="position:absolute;left:11%;bottom:16%;opacity:.22;animation:drift 15s ease-in-out infinite">
+      <path d="M57,42 L57,13 Q60,4 63,13 L63,42 Z" fill="#fbeade"></path><path d="M63,17 Q86,6 92,20 Q75,31 63,22 Z" fill="#fbeade"></path><path d="M60,36 C72,36 80,45 80,61 C80,85 76,110 70,129 C68,134 64,134 63,129 C58,110 46,88 44,66 C43,48 49,36 60,36 Z" fill="#fbeade"></path><ellipse cx="60" cy="40" rx="11" ry="5" fill="#fbeade"></ellipse>
+    </svg>
+    <svg viewBox="0 0 120 140" width="42" height="49" aria-hidden="true" style="position:absolute;right:24%;bottom:22%;opacity:.16;animation:drift 21s ease-in-out infinite 2s">
+      <path d="M57,42 L57,13 Q60,4 63,13 L63,42 Z" fill="#fbeade"></path><path d="M63,17 Q86,6 92,20 Q75,31 63,22 Z" fill="#fbeade"></path><path d="M60,36 C72,36 80,45 80,61 C80,85 76,110 70,129 C68,134 64,134 63,129 C58,110 46,88 44,66 C43,48 49,36 60,36 Z" fill="#fbeade"></path><ellipse cx="60" cy="40" rx="11" ry="5" fill="#fbeade"></ellipse>
+    </svg>
+    <svg viewBox="0 0 120 140" width="34" height="40" aria-hidden="true" style="position:absolute;left:26%;top:15%;opacity:.14;animation:drift 18s ease-in-out infinite 5s">
+      <path d="M57,42 L57,13 Q60,4 63,13 L63,42 Z" fill="#fbeade"></path><path d="M63,17 Q86,6 92,20 Q75,31 63,22 Z" fill="#fbeade"></path><path d="M60,36 C72,36 80,45 80,61 C80,85 76,110 70,129 C68,134 64,134 63,129 C58,110 46,88 44,66 C43,48 49,36 60,36 Z" fill="#fbeade"></path><ellipse cx="60" cy="40" rx="11" ry="5" fill="#fbeade"></ellipse>
+    </svg>
+
+    <div style="position:relative;text-align:center;max-width:960px">
+      <svg viewBox="0 0 120 140" width="86" height="100" aria-hidden="true" style="display:block;margin:0 auto 18px;overflow:visible;animation:sway 5.5s ease-in-out infinite;filter:drop-shadow(0 14px 26px rgba(0,0,0,.28))">
+        <path d="M57,42 L57,13 Q60,4 63,13 L63,42 Z" fill="#3f7d34"></path>
+        <path d="M63,17 Q86,6 92,20 Q75,31 63,22 Z" fill="#5aa64c" style="transform-origin:63px 19px;animation:wag 3.2s ease-in-out infinite"></path>
+        <path d="M60,36 C72,36 80,45 80,61 C80,85 76,110 70,129 C68,134 64,134 63,129 C58,110 46,88 44,66 C43,48 49,36 60,36 Z" fill="#f04a34"></path><ellipse cx="60" cy="40" rx="11" ry="5" fill="#3f7d34"></ellipse>
+        <ellipse cx="56" cy="68" rx="5" ry="16" fill="#ffffff" opacity="0.22" transform="rotate(-8 56 68)"></ellipse>
+      </svg>
+      <p style="font-size:11.5px;letter-spacing:.32em;text-transform:uppercase;color:#f3b9a2;margin:0 0 26px">context aware ingredient substitution</p>
+
+      <div style="font-family:var(--font-heading);font-size:clamp(46px,9vw,112px);line-height:1;letter-spacing:-.02em;display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;margin-bottom:8px">
+        <span>S<span style="{{ w0 }}">ugar</span></span>
+        <span>w<span style="{{ w1 }}">heat flour</span></span>
+        <span>a<span style="{{ w2 }}">quafaba</span></span>
+        <span>p<span style="{{ w3 }}">aprika</span></span>
+        <span>r<span style="{{ w4 }}">icotta</span></span>
+        <span>i<span style="{{ w5 }}">ce water</span></span>
+        <span>k<span style="{{ w6 }}">efir</span></span>
+        <span>a<span style="{{ w7 }}">pplesauce</span></span>
+      </div>
+
+      <p style="font-size:clamp(15px,2vw,19px);line-height:1.6;max-width:44ch;margin:22px auto 0;color:#f2d6c9">{{ enterLine }}</p>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:40px">
+        <button onClick="{{ enter }}" style="cursor:pointer;display:inline-flex;align-items:center;gap:12px;font-family:var(--font-heading);font-size:17px;padding:17px 44px;border-radius:999px;border:0;background:#fbeade;color:#8f2c1b;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:transform .2s ease, box-shadow .2s ease;animation:pulse 4s ease-in-out infinite" style-hover="transform:translateY(-3px);box-shadow:0 16px 38px rgba(0,0,0,.36)" style-active="transform:translateY(0)">Enter
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </button>
+        <span style="font-size:12.5px;color:#f7d8cc">A sign in will live here later</span>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showDevLink&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;enterLine&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Twenty one substitutions that know where they work, and say nothing where they do not.&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Content&quot;}}">
+const NAMES = {
+  butter:'Butter', egg:'Egg', 'egg-white':'Egg white', buttermilk:'Buttermilk', milk:'Milk',
+  'heavy-cream':'Heavy cream', 'wheat-flour':'Wheat flour', cornstarch:'Cornstarch',
+  sugar:'Granulated sugar', 'lemon-juice':'Lemon juice', 'fish-sauce':'Fish sauce'
+};
+
+const SUBS = [
+  {f:'butter',t:'Coconut oil',r:1.0,b:'by weight',n:null,rel:'ESTABLISHED',k:['fat'],l:['dairy flavour'],ok:['CREAMING','CAKE','COOKIE'],no:['BUTTERCREAM'],
+   eff:[['Flavour','more','Coconut note unless refined coconut oil is used.'],['Texture','less','Sets harder when cold.']],adj:[]},
+  {f:'butter',t:'Neutral oil',r:0.8,b:'by weight',n:'Butter is roughly 80 percent fat and 16 percent water. Match the fat, then put the water back.',rel:'ESTABLISHED',k:['fat'],l:['water content','creamed air'],ok:['CAKE','MUFFIN'],no:['CREAMING','LAMINATION'],
+   eff:[['Moisture','more','Oil coats flour more completely, so the crumb reads moister.'],['Rise','less','No air is beaten in, because oil cannot be creamed.']],adj:[['Add liquid','About 15 percent of the butter weight — butter carries water that the oil does not.']]},
+  {f:'butter',t:'Vegan butter block',r:1.0,b:'by weight',n:null,rel:'ESTABLISHED',k:['fat'],l:['lamination plasticity'],ok:['CREAMING','RUBBING_IN'],no:['LAMINATION','CROISSANT','PUFF_PASTRY'],
+   eff:[['Texture','less','Will not hold discrete layers through folding.']],adj:[]},
+  {f:'butter',t:'Olive oil',r:0.8,b:'by weight',n:null,rel:'ESTABLISHED',k:['fat'],l:['dairy flavour','high heat tolerance'],ok:['PAN_FRYING','SAUTEING'],no:['HIGH_HEAT_SEARING','BUTTERCREAM'],
+   eff:[['Flavour','more','Peppery, and it carries into the finished dish.']],adj:[['Lower temp','Stay below the smoke point — olive oil smokes well before clarified butter does.']]},
+  {f:'butter',t:'Applesauce',r:0.5,b:'by weight',n:'Replace at most half. Full replacement turns the crumb rubbery.',rel:'SITUATIONAL',k:['moisture'],l:['fat','tenderiser'],ok:['MUFFIN','QUICK_BREAD'],no:['SHORTCRUST','COOKIE'],
+   eff:[['Texture','less','Rubbery if you replace more than half.'],['Browning','less','']],adj:[]},
+  {f:'egg',t:'Flax egg',r:1.0,b:'by volume',n:'One egg equals one tablespoon ground flaxseed plus three tablespoons water.',rel:'ESTABLISHED',k:['binder'],l:['leavener','structure','richness'],ok:['MUFFIN','COOKIE','QUICK_BREAD'],no:['SPONGE_CAKE','MERINGUE','CUSTARD'],
+   eff:[['Texture','less','Denser and slightly gummy.'],['Colour','more','Visible brown flecks.']],adj:[['Rest longer','10 minutes before use — the flaxseed needs time to gel.']]},
+  {f:'egg-white',t:'Aquafaba',r:1.0,b:'by weight',n:'One egg white equals about 30 g aquafaba.',rel:'ESTABLISHED',k:['foaming'],l:['foam stability'],ok:['WHIPPING','MERINGUE','MOUSSE'],no:[],
+   eff:[['Set','less','Foam is less stable and weeps sooner.']],adj:[['Add acid','A pinch of cream of tartar stabilises a foam that is weaker than egg white.'],['Rest longer','Whip two to three times longer — aquafaba takes far longer to reach stiff peaks.']]},
+  {f:'egg',t:'Baking powder, oil and water',r:1.0,b:'by volume',n:'Rise only. Not a general egg replacement.',rel:'SITUATIONAL',k:['leavener'],l:['binder','structure','richness'],ok:['CAKE'],no:['CUSTARD','MERINGUE'],eff:[],adj:[]},
+  {f:'egg',t:'Plant milk and maple glaze',r:1.0,b:'by volume',n:'Surface glaze only.',rel:'ESTABLISHED',k:['browning'],l:['gloss'],ok:['GLAZING'],no:['CUSTARD','CAKE'],
+   eff:[['Colour','less','Browns, but with far less gloss.']],adj:[]},
+  {f:'egg',t:'Silken tofu',r:1.0,b:'by weight',n:'One egg equals about 60 g blended silken tofu.',rel:'SITUATIONAL',k:['set'],l:['richness','leavener'],ok:['QUICHE'],no:['SWEET_CUSTARD'],eff:[],adj:[]},
+  {f:'buttermilk',t:'Milk with added acid',r:1.0,b:'by volume',n:'Acid as a leavening reagent. It must react with baking soda.',rel:'ESTABLISHED',k:['acid'],l:['viscosity'],ok:['PANCAKE','SODA_BREAD'],no:[],
+   eff:[],adj:[['Rest longer','10 minutes — let the milk clabber before mixing.']]},
+  {f:'buttermilk',t:'Milk with added acid',r:1.0,b:'by volume',n:'Acid as a tenderiser in a brine. Different job, same swap.',rel:'SITUATIONAL',k:['acid'],l:['viscosity','cling'],ok:['FRIED_CHICKEN','BRINING'],no:[],eff:[],adj:[]},
+  {f:'heavy-cream',t:'Coconut cream',r:1.0,b:'by volume',n:null,rel:'SITUATIONAL',k:['fat'],l:['emulsion stability'],ok:['CURRY','WHIPPING'],no:['PAN_SAUCE_WITH_WINE'],
+   eff:[['Flavour','more','Distinctly coconut.']],adj:[]},
+  {f:'milk',t:'Oat milk',r:1.0,b:'by volume',n:null,rel:'ESTABLISHED',k:['liquid'],l:[],ok:['BECHAMEL'],no:[],
+   eff:[['Texture','more','Thickens slightly more than dairy milk.']],adj:[]},
+  {f:'wheat-flour',t:'Cornstarch',r:0.5,b:'by weight',n:'Cornstarch has roughly twice the thickening power of flour.',rel:'ESTABLISHED',k:['thickener'],l:['roux flavour','heat stability'],ok:['THICKENING'],no:['ROUX','PROLONGED_SIMMER'],
+   eff:[['Flavour','less','No toasted roux flavour at all.'],['Colour','less','Sets clear rather than opaque.']],adj:[]},
+  {f:'wheat-flour',t:'Almond flour',r:0.9,b:'by weight',n:'Never a straight swap. There is no gluten to build structure.',rel:'CONTESTED',k:['bulk'],l:['gluten structure'],ok:['CAKE'],no:['BREAD','LAMINATION'],
+   eff:[['Rise','much less','No gluten network, so nothing holds the gas.']],adj:[['Add binder','One egg or 5 g psyllium per 100 g flour — something has to replace the gluten network.']]},
+  {f:'cornstarch',t:'Arrowroot',r:1.0,b:'by weight',n:null,rel:'ESTABLISHED',k:['thickener'],l:[],ok:['FRUIT_SAUCE'],no:['DAIRY_SAUCE'],
+   eff:[['Texture','same','Holds better against acid than cornstarch does.']],adj:[]},
+  {f:'fish-sauce',t:'Soy sauce with seaweed',r:1.0,b:'by volume',n:null,rel:'SITUATIONAL',k:['umami','salt'],l:['fermented funk'],ok:['CURRY','DIPPING_SAUCE'],no:[],
+   eff:[['Flavour','less','Salt and umami survive, the fermented funk does not.']],adj:[]},
+  {f:'lemon-juice',t:'Vinegar',r:1.0,b:'by volume',n:null,rel:'SITUATIONAL',k:['acid'],l:['citrus aroma'],ok:['VINAIGRETTE'],no:['DAIRY_SAUCE'],eff:[],adj:[]},
+  {f:'sugar',t:'Honey',r:0.75,b:'by weight',n:null,rel:'ESTABLISHED',k:['sweetener'],l:['crystal structure'],ok:['CAKE','COOKIE'],no:['CARAMELISATION'],
+   eff:[['Browning','much more','Fructose browns much faster than sucrose.'],['Moisture','more','Honey is hygroscopic, the crumb stays moist longer.']],adj:[['Reduce liquid','About 60 ml per 240 ml of honey — honey is roughly 17 percent water.'],['Lower temp','By about 15 C, otherwise the outside burns before the centre sets.']]},
+  {f:'sugar',t:'Erythritol',r:1.0,b:'by weight',n:null,rel:'SITUATIONAL',k:['sweetener'],l:['browning','spread'],ok:['COOKIE'],no:['CARAMELISATION','MERINGUE'],
+   eff:[['Browning','much less','Does not caramelise at all.'],['Texture','less','Cookies will not spread.'],['Flavour','less','Noticeable cooling sensation on the palate.']],adj:[]}
+];
+
+const SITS = [
+  {g:'Anywhere', items:[['ANY','anywhere']]},
+  {g:'Baking', items:[['CAKE','a cake'],['COOKIE','cookies'],['MUFFIN','muffins'],['QUICK_BREAD','a quick bread'],['PANCAKE','pancakes'],['CROISSANT','a croissant'],['MERINGUE','a meringue'],['BUTTERCREAM','buttercream'],['SODA_BREAD','soda bread'],['MOUSSE','a mousse']]},
+  {g:'Savoury & sauces', items:[['CURRY','a curry'],['BECHAMEL','a béchamel'],['FRIED_CHICKEN','fried chicken'],['QUICHE','a quiche'],['FRUIT_SAUCE','a fruit sauce'],['VINAIGRETTE','a vinaigrette'],['DIPPING_SAUCE','a dipping sauce']]},
+  {g:'Technique', items:[['CREAMING','creaming'],['RUBBING_IN','rubbing in'],['WHIPPING','whipping'],['THICKENING','thickening'],['PAN_FRYING','pan frying'],['LAMINATION','laminating'],['GLAZING','glazing'],['BRINING','brining'],['CARAMELISATION','caramelising']]}
+];
+
+const ROLE_LINE = {
+  butter:'fat · tenderiser · flavour', egg:'binder · leavener · structure', 'egg-white':'foaming',
+  buttermilk:'acid · cling', milk:'liquid', 'heavy-cream':'fat · emulsion',
+  'wheat-flour':'structure · thickener', cornstarch:'thickener', sugar:'sweetener · browning',
+  'lemon-juice':'acid', 'fish-sauce':'umami · salt'
+};
+
+const DOCS = [
+  {id:'readme',kicker:'Guide',group:'Start here',title:'What Swaprika is',summary:'The idea in one page, with the query that shows why context matters.',blocks:[
+    {h:'The problem',ps:['Every food API can tell you that butter can be replaced by coconut oil. None of them can tell you that it will ruin a croissant, that you need to put water back when you swap in oil, or what you give up when you do.']},
+    {h:'Why the data is on the edge',ps:['A substitution is not a link between two ingredients. It is a fact about a context, and the same pair of ingredients has many of them.','Two entries in the seed data are both buttermilk to milk plus acid: one is acid as a leavening reagent for pancakes, the other is acid as a tenderiser in a chicken brine. Different ratios of usefulness, different failure modes, same pair.']},
+    {h:'Try it',ps:['Change dishType: CAKE to technique: LAMINATION and run it again. You get an empty list, because no vegan fat in this dataset has been verified to survive lamination. Returning nothing is the correct answer.'],code:'query {\n  ingredient(id: "butter") {\n    substitutions(context: { dishType: CAKE, requires: [VEGAN] }) {\n      edges {\n        node { canonicalName }\n        ratio { amount basis note }\n        preservesRoles\n        losesRoles\n        effects { dimension direction note }\n        adjustments { action amount reason }\n        reliability\n      }\n    }\n  }\n}'},
+    {h:'Status',ps:['Early. The schema and the model are settled, the dataset is 21 hand built edges chosen because context changes the answer. Growing the dataset is the work, not the server.']}
+  ]},
+  {id:'schema',kicker:'Reference',group:'Start here',title:'Schema and pricing tiers',summary:'Field level entitlements are declared on the field, not checked in a handler.',blocks:[
+    {h:'Entitlements live in the schema',ps:['A free key resolves node, ratio, preservesRoles, losesRoles and dietary. It gets null plus an explicit authorization error for the rest, and the free fields in the same response still resolve.'],code:"effects: t.field({\n  type: [Effect],\n  authScopes: { minPlan: 'DEVELOPER' },\n  ...\n})"},
+    {h:'The stack',ps:['Cloudflare Workers for the runtime, GraphQL Yoga for the server, Pothos for the schema, D1 (SQLite) for the database and Drizzle as the query layer.']}
+  ]},
+  {id:'adr1',kicker:'ADR 0001 · accepted',group:'Decisions',title:'GraphQL Yoga and Pothos, not Apollo Server',summary:'The durable bet is the Fetch runtime model, not the library.',blocks:[
+    {h:'Context',ps:['The API has to run on Cloudflare Workers, expose field level entitlements per pricing plan, and survive four years without a rewrite.']},
+    {h:'Reasoning',ps:['Yoga is built on the W3C Fetch Request/Response model, which is what Workers, Deno and Bun all converged on. It runs on Workers unchanged. Apollo Server assumes a Node shaped world and needs adapters.','Pothos was chosen over SDL first and over TypeGraphQL because its scope-auth plugin expresses per plan field access as a declarative field option. That turns the pricing tier into a schema concern instead of scattered handler checks.']}
+  ]},
+  {id:'adr2',kicker:'ADR 0002 · accepted',group:'Decisions',title:'D1 and Drizzle, with relational child tables',summary:'Zero fixed cost was a hard requirement, and the joins are the substance.',blocks:[
+    {h:'Reasoning',ps:['D1 is free up to 5 GB, needs no operations work, and is co located with Workers. An earlier draft assumed Postgres on a VPS, which was reversed once the cost constraint became explicit.','Child rows are separate tables rather than JSON blobs. JSON would have been less code, but the joins are the substance of this project and context filtering should be pushable into SQL as the dataset grows.']},
+    {h:'Known limitation',ps:['Context filtering currently happens in the resolver, against rows already batched by DataLoader. That is one query per child table per request, not one per parent row, so there is no N+1.']}
+  ]},
+  {id:'adr3',kicker:'ADR 0003 · accepted',group:'Decisions',title:'Substitution is not transitive, so there are no chains',summary:'A beautiful query that returns nonsense is worse than no query.',blocks:[
+    {h:'Decision',ps:['Substitution chains and a substitutionPath field will not be built. Recursion is exposed on the taxonomy, not on substitutions.']},
+    {h:'Reasoning',ps:['Substitutability does not compose. If A works for B in some context, and B works for C in some other context, it does not follow that A works for C in either. Two hops from butter lands somewhere no cook would go.','The taxonomy is genuinely hierarchical and genuinely recursive. It demonstrates the same engineering, depth limiting, cycle handling and DataLoader batching, without shipping wrong answers.']}
+  ]},
+  {id:'adr6',kicker:'ADR 0006 · accepted',group:'Decisions',title:'Context filtering is an allow list, not a deny list',summary:'Absence of a recorded failure is not evidence of success.',blocks:[
+    {h:'Problem found during verification',ps:['Under a deny list, asking for LAMINATION returned coconut oil, purely because nobody had written down that coconut oil fails at lamination. The absence of a recorded failure was being treated as evidence of success. That is the exact failure mode this project exists to avoid.']},
+    {h:'Consequence',ps:['A substitution is returned for a context only if there is a row positively recording that it works there. Asking for a technique that has not been verified returns an empty list. That looks worse in a demo and is correct.']}
+  ]},
+  {id:'adr5',kicker:'ADR 0005 · temporary',group:'Decisions',title:'API keys are a placeholder map',summary:'Three hardcoded development keys until there is something to protect.',blocks:[
+    {h:'Current state',ps:['src/context.ts maps three hardcoded development keys to plans.'],code:'free-key -> FREE\ndev-key  -> DEVELOPER\npro-key  -> PRO'},
+    {h:'Before any public deploy',ps:['Keys move to D1, stored hashed, with a plan, a created_at and a revocation flag. Rate limiting moves to the Cloudflare edge. Neither blocks local development and neither changes the schema.']}
+  ]},
+  {id:'adr4',kicker:'ADR 0004 · accepted',group:'Licence',title:'MIT for the code, CC BY-NC-SA for the data',summary:'The server is not the valuable asset. The data is.',blocks:[
+    {h:'Decision',ps:['Code is MIT. The curated substitution dataset is CC BY-NC-SA 4.0, with commercial use available under a separate licence from the copyright holder. Open Food Facts is deliberately excluded from the core dataset.']},
+    {h:'Reasoning',ps:['Anyone can write this server. The substitution data is the only part that is hard to copy, so the two are licensed differently. Non commercial users take it free under CC BY-NC-SA, commercial users buy a licence.','Open Food Facts is ODbL, which carries share alike obligations on derived databases. USDA FoodData Central is public domain and safe to mix in freely.']},
+    {h:'Consequence that must not be forgotten',ps:['The dual licence only works while a single party holds the rights to the whole dataset. CONTRIBUTING.md therefore requires copyright assignment from the first commit.']}
+  ]},
+  {id:'contrib',kicker:'Contributing',group:'Licence',title:'How to add a substitution',summary:'A substitution is a claim about cooking. It needs to be falsifiable.',blocks:[
+    {h:'Copyright assignment is required',ps:['By submitting a pull request you agree that you are the original author, that you assign copyright in your contribution to the project maintainer, and that your contribution does not include data copied from a source with incompatible terms.']},
+    {h:'Every new edge must include',ps:['A ratio with an explicit basis, WEIGHT or VOLUME, never a bare number.','What culinary roles it preserves and what it loses.','At least one excluded technique or dish type, or an explicit statement that there are none.','A reliability value: ESTABLISHED, SITUATIONAL or CONTESTED.','If you cannot fill in losesRoles you probably do not understand the substitution well enough yet. That field is the product.']}
+  ]}
+];
+
+const PILL = 'cursor:pointer;font:inherit;font-size:13.5px;padding:8px 16px;border-radius:999px;transition:all .18s ease;';
+
+class Component extends DCLogic {
+  state = { screen:'home', gone:'0', sit:'CAKE', tab:1, ing:'butter', flipped:false, docId:null, letter:0 };
+
+  componentDidMount() {
+    this._t = setInterval(() => this.setState(s => ({ letter:(s.letter + 1) % 8 })), 1700);
+  }
+  componentWillUnmount() {
+    clearInterval(this._t); clearTimeout(this._f);
+    if (this._io) this._io.disconnect();
+  }
+
+  // Re-arm the reveal: hold the "you had" face until the cards are actually
+  // on screen, then flip.
+  stage() {
+    clearTimeout(this._f);
+    this.setState({ flipped:false });
+    setTimeout(() => this.maybeStart(), 60);
+  }
+
+  maybeStart() {
+    const el = this._el;
+    if (!el || this.state.gone !== '1') return;
+    const r = el.getBoundingClientRect();
+    const vh = window.innerHeight || 800;
+    const vis = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+    if (vis > 0 && vis >= Math.min(r.height, vh) * 0.4) {
+      clearTimeout(this._f);
+      this._f = setTimeout(() => this.setState({ flipped:true }), 1200);
+    }
+  }
+
+  bindResults(el) {
+    if (!el || el === this._el) return;
+    this._el = el;
+    if (this._io) this._io.disconnect();
+    this._io = new IntersectionObserver(() => this.maybeStart(), { threshold:[0, 0.4, 0.8] });
+    this._io.observe(el);
+  }
+
+  matches(s) {
+    const v = this.state.sit;
+    return v === 'ANY' ? true : s.ok.indexOf(v) >= 0;
+  }
+
+  renderVals() {
+    const st = this.state;
+    const nav = k => st.screen === k ? 'var(--paprika-deep)' : 'color-mix(in srgb, var(--color-text) 62%, transparent)';
+
+    const words = ['ugar','heat flour','quafaba','aprika','icotta','ce water','efir','pplesauce'];
+    const w = {};
+    words.forEach((word, i) => {
+      const on = st.letter === i;
+      w['w' + i] = 'display:inline-block;overflow:hidden;white-space:nowrap;vertical-align:baseline;text-transform:none;'
+        + 'overflow-clip-margin:0.2em;padding-bottom:0.08em;vertical-align:-0.18em;'
+        + 'max-width:' + (on ? (word.length * 0.72) + 'em' : '0em') + ';opacity:' + (on ? 1 : 0)
+        + ';color:#f0b07a;transition:max-width .6s cubic-bezier(.65,0,.35,1), opacity .35s ease';
+    });
+
+    const all = SUBS.filter(s => s.f === st.ing);
+    const results = all.filter(s => this.matches(s)).map((s, i) => {
+      const d = (i * 260) + 'ms';
+      const face = 'position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:0 22px;backface-visibility:hidden;';
+      return {
+        fromName: NAMES[s.f], toName: s.t,
+        ratio: s.r + '×', basis: s.b, rel: s.rel.toLowerCase(),
+        note: s.n, keeps: s.k, loses: s.l,
+        eff: s.eff.map(e => ({ head: e[0] + ' ' + e[1] + (e[2] ? ' —' : ''), note: e[2] })),
+        adj: s.adj.map(a => ({ head: a[0] + ' — ', tail: a[1] })),
+        card: 'background:var(--color-surface);border-radius:32px;padding:0 0 18px;overflow:hidden;box-shadow:var(--shadow-sm);animation:rise .6s cubic-bezier(.2,.7,.3,1) both;animation-delay:' + (i * 90) + 'ms',
+        badge: 'position:absolute;right:18px;top:50%;margin-top:-18px;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:' + (st.flipped ? 'rgba(251,234,222,.22)' : 'var(--paprika)') + ';color:' + (st.flipped ? '#fbeade' : '#fff') + ';transition:all .5s ease;transition-delay:' + d + ';transform:rotate(' + (st.flipped ? 180 : 0) + 'deg)',
+        stripOuter: 'position:relative;perspective:1100px;height:96px',
+        strip: 'position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 1.15s cubic-bezier(.34,.02,.2,1);transition-delay:' + d
+          + ';transform:rotateX(' + (st.flipped ? -180 : 0) + 'deg)',
+        faceA: face + 'background:var(--color-neutral-300);color:var(--color-neutral-900)',
+        faceB: face + 'background:var(--paprika);color:#fff;transform:rotateX(180deg)',
+        relStyle: 'margin-left:auto;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;padding:3px 10px;border-radius:999px;'
+          + (s.rel === 'ESTABLISHED' ? 'background:#dcead2;color:#2f5f27'
+            : s.rel === 'CONTESTED' ? 'background:#fbdcd6;color:var(--paprika-ink)'
+            : 'background:var(--color-neutral-200);color:var(--color-neutral-800)')
+      };
+    });
+
+    const failsHere = st.sit !== 'ANY' && all.some(s => s.no.indexOf(st.sit) >= 0);
+    const sitLabel = (SITS.reduce((a, g) => a.concat(g.items), []).find(x => x[0] === st.sit) || ['', ''])[1];
+    const sitGroupIdx = SITS.findIndex(g => g.items.some(x => x[0] === st.sit));
+    const phrase = st.sit === 'ANY' ? 'anywhere' : (sitGroupIdx === 3 ? 'when ' + sitLabel : 'in ' + sitLabel);
+
+    const tabs = SITS.map((g, i) => {
+      const on = st.tab === i;
+      return {
+        name: g.g,
+        pick: () => this.setState({ tab: i }),
+        style: 'cursor:pointer;font:inherit;font-size:13px;letter-spacing:.02em;padding:9px 18px;border:0;border-radius:999px;transition:all .2s ease;'
+          + (on ? 'background:var(--paprika-deep);color:#fff' : 'background:transparent;color:color-mix(in srgb, var(--color-text) 60%, transparent)')
+      };
+    });
+
+    const sitItems = SITS[st.tab].items.map(it => {
+      const on = st.sit === it[0];
+      return {
+        label: it[1],
+        pick: () => { this.setState({ sit: it[0] }); this.stage(); },
+        style: PILL + (on
+          ? 'background:var(--paprika);color:#fff;border:1px solid var(--paprika)'
+          : 'background:var(--color-bg);color:color-mix(in srgb, var(--color-text) 78%, transparent);border:1px solid var(--color-divider)')
+      };
+    });
+
+    const ingChips = Object.keys(NAMES).map(id => {
+      const mine = SUBS.filter(s => s.f === id);
+      const works = mine.filter(s => st.sit === 'ANY' || s.ok.indexOf(st.sit) >= 0).length;
+      const fails = st.sit !== 'ANY' && mine.some(s => s.no.indexOf(st.sit) >= 0);
+      const on = st.ing === id;
+      return {
+        label: NAMES[id],
+        hint: works ? works + '' : (fails ? 'fails' : '—'),
+        pick: () => { this.setState({ ing: id }); this.stage(); },
+        style: PILL + (on
+          ? 'background:var(--paprika-deep);color:#fff;border:1px solid var(--paprika-deep)'
+          : works
+            ? 'background:var(--color-surface);color:var(--color-text);border:1px solid transparent'
+            : 'background:transparent;color:color-mix(in srgb, var(--color-text) 38%, transparent);border:1px dashed var(--color-neutral-400)')
+      };
+    });
+
+    const pantry = Object.keys(NAMES).map(id => {
+      const mine = SUBS.filter(s => s.f === id);
+      return {
+        name: NAMES[id], roleLine: ROLE_LINE[id],
+        tos: mine.map(s => s.t).filter((t, i, a) => a.indexOf(t) === i).slice(0, 3),
+        countLine: mine.length + (mine.length === 1 ? ' verified swap' : ' verified swaps'),
+        open: () => { this.setState({ screen:'home', ing:id, sit:'ANY' }); this.stage(); window.scrollTo(0, 0); }
+      };
+    });
+
+    const groups = [];
+    DOCS.forEach(d => {
+      let g = groups.find(x => x.name === d.group);
+      if (!g) { g = { name: d.group, items: [] }; groups.push(g); }
+      g.items.push({
+        kicker: d.kicker, title: d.title, summary: d.summary,
+        open: () => { this.setState({ screen:'doc', docId:d.id }); window.scrollTo(0, 0); }
+      });
+    });
+
+    const doc = DOCS.find(d => d.id === st.docId) || DOCS[0];
+
+    return Object.assign(w, {
+      gone: st.gone,
+      enterLine: this.props.enterLine ?? 'Twenty one substitutions that know where they work, and say nothing where they do not.',
+      showDev: this.props.showDevLink ?? true,
+      resultsRef: el => this.bindResults(el),
+      enter: () => {
+        clearTimeout(this._f);
+        this.setState({ gone:'1', flipped:false });
+        setTimeout(() => this.maybeStart(), 950);
+      },
+      goHome: () => { this.setState({ screen:'home' }); this.stage(); },
+      goBrowse: () => this.setState({ screen:'browse' }),
+      goDocs: () => this.setState({ screen:'docs' }),
+      navHome: nav('home'), navBrowse: nav('browse'), navDocs: nav('docs'),
+      isHome: st.screen === 'home', isBrowse: st.screen === 'browse',
+      isDocs: st.screen === 'docs', isDoc: st.screen === 'doc',
+      tabs, sitItems, ingChips, pantry, docGroups: groups, doc,
+      toCover: () => { this.setState({ gone:'0', screen:'home' }); window.scrollTo(0, 0); this.stage(); },
+      chosen: st.sit === 'ANY' ? 'anywhere' : sitLabel,
+      step2Hint: st.sit === 'ANY' ? 'anything in the pantry' : 'the number is how many swaps hold up ' + phrase,
+      results, hasResults: results.length > 0, isEmpty: results.length === 0,
+      resultHeading: results.length
+        ? 'Instead of ' + NAMES[st.ing].toLowerCase() + ', ' + phrase
+        : st.sit === 'ANY'
+          ? 'Nothing recorded for ' + NAMES[st.ing].toLowerCase()
+          : 'No ' + NAMES[st.ing].toLowerCase() + ' swap is verified ' + phrase,
+      resultCount: results.length + (results.length === 1 ? ' swap' : ' swaps'),
+      emptyTitle: failsHere ? 'Known to fail here.' : 'No verified substitution.',
+      emptyBody: failsHere
+        ? 'This is recorded as a failure, not a gap. Every other food API would still hand you an answer and ruin the dish.'
+        : 'We have not tested this combination. Saying nothing beats guessing.'
+    });
+  }
+}
+</script>
+</body>
+</html>

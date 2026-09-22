@@ -382,6 +382,21 @@ builder.queryFields((t) => ({
     resolve: (_root, args, ctx) => ctx.loaders.ingredientById.load(String(args.id)),
   }),
 
+  ingredients: t.field({
+    type: [Ingredient],
+    description:
+      'The pantry: every ingredient that has at least one recorded substitution. Categories and replacement-only ingredients are excluded, because you cannot ask "what replaces a category".',
+    resolve: async (_root, _args, ctx) => {
+      const rows = await ctx.db
+        .selectDistinct({ id: s.substitutions.fromId })
+        .from(s.substitutions);
+      const loaded = await ctx.loaders.ingredientById.loadMany(rows.map((r) => r.id));
+      return loaded
+        .filter((i): i is s.IngredientRow => !!i && !(i instanceof Error))
+        .sort((a, b) => a.canonicalName.localeCompare(b.canonicalName));
+    },
+  }),
+
   ingredientByName: t.field({
     type: Ingredient,
     nullable: true,

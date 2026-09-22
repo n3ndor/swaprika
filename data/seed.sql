@@ -76,7 +76,13 @@ INSERT INTO ingredient_roles (ingredient_id, role) VALUES
   ('wheat-flour','STRUCTURE'),('wheat-flour','THICKENER'),
   ('cornstarch','THICKENER'),
   ('sugar','SWEETENER'),('sugar','BROWNING'),('sugar','TENDERISER'),
-  ('lemon-juice','ACID'),('fish-sauce','UMAMI'),('fish-sauce','SALT');
+  ('lemon-juice','ACID'),('fish-sauce','UMAMI'),('fish-sauce','SALT'),
+  -- Needed so the pantry screen can describe every ingredient from the API
+  -- rather than from a hardcoded list in the front end.
+  ('egg-white','FOAMING'),
+  ('buttermilk','ACID'),('buttermilk','CLING'),
+  ('milk','LIQUID'),
+  ('heavy-cream','FAT'),('heavy-cream','EMULSION_STABILITY');
 
 INSERT INTO ingredient_allergens (ingredient_id, allergen) VALUES
   ('butter','MILK'),('buttermilk','MILK'),('milk','MILK'),('heavy-cream','MILK'),

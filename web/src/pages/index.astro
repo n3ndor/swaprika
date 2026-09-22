@@ -1,240 +1,32 @@
 ---
-import Base from '../layouts/Base.astro';
-import Demo from '../components/Demo';
-import { Mascot } from '../components/Mascot';
+import '../styles/organic.css';
+import '../styles/app.css';
+import App from '../components/App';
 ---
 
-<Base
-  title="Swaprika, a GraphQL API for ingredient substitution that knows the context"
-  description="What can replace this ingredient, in this situation, and what changes if you do. A GraphQL API returning ratios, what the swap loses, the adjustments it needs, and the contexts where it fails."
-  page="home"
->
-  <main>
-    <section class="hero">
-      <div class="hero-copy">
-        <h1>Butter in a cake is not<br /> butter in a croissant.</h1>
-        <p class="lede">
-          Swaprika is a GraphQL API for ingredient substitution. It answers what can
-          replace an ingredient <em>in a specific situation</em>, what the swap gives
-          up, and what you have to change to make it work.
-        </p>
-        <div class="cta">
-          <a class="btn primary" href="#demo">Try it, no signup</a>
-          <a class="btn" href="/docs">Read the docs</a>
-        </div>
-      </div>
-      <div class="hero-art">
-        <Mascot client:load mood="idle" size={230} />
-      </div>
-    </section>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Swaprika, context aware ingredient substitution</title>
+    <meta
+      name="description"
+      content="A swap is only true somewhere. Butter becomes oil in a cake and ruins a croissant. Swaprika is a GraphQL API that knows where a substitution works, what it loses, and what to change."
+    />
+    <meta name="theme-color" content="#f5ead8" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  </head>
 
-    <section>
-      <div class="eyebrow">The problem</div>
-      <h2>A substitution list with no context is a support ticket waiting to happen.</h2>
-      <p class="sub">
-        This is the failure every recipe app with a dietary filter eventually ships.
-      </p>
-      <div class="story">
-        <div class="step">
-          <span class="n">1</span>
-          <p>
-            A user with a dairy allergy opens your app and asks what to use instead of
-            butter. Your backend calls a substitution endpoint.
-          </p>
-        </div>
-        <div class="step">
-          <span class="n">2</span>
-          <p>
-            It returns a flat list: coconut oil 1:1, applesauce 1:2, olive oil 1:1. No
-            context, no conditions. Your app shows the list. It looks correct.
-          </p>
-        </div>
-        <div class="step bad">
-          <span class="n">3</span>
-          <p>
-            The user was making croissants. Coconut oil cannot laminate. The dough fails,
-            and the person blames your app, not the API you bought.
-          </p>
-        </div>
-      </div>
-    </section>
+  <body>
+    <!-- Rendered on the server, so every document is in the HTML for readers,
+         crawlers and anyone with JavaScript off. The curtain is an overlay, not
+         a gate on the content beneath it. -->
+    <App client:load />
 
-    <section>
-      <div class="eyebrow">The difference</div>
-      <h2>Same question. Two answers.</h2>
-      <p class="sub">
-        Both of these answer "what replaces butter". Only one is safe to put in front of
-        a user who has not told you what they are cooking.
-      </p>
-
-      <div class="compare">
-        <div class="col">
-          <h4>A flat substitution endpoint</h4>
-          <pre><code>{`{
-  "ingredient": "butter",
-  "substitutes": [
-    "coconut oil (1:1)",
-    "greek yogurt (1:2)",
-    "avocado (1:1)",
-    "applesauce (1:2)"
-  ]
-}`}</code></pre>
-          <p class="verdict">
-            Four suggestions, no conditions. <b>Fine for a muffin, wrong for a croissant,
-            wrong for buttercream</b>, and nothing in the payload tells you which is
-            which.
-          </p>
-        </div>
-
-        <div class="col ours">
-          <h4>Swaprika</h4>
-          <pre><code>{`{
-  "node": "Neutral oil",
-  "ratio": { "amount": 0.8, "basis": "WEIGHT",
-    "note": "Butter is ~80% fat, 16% water." },
-  "preservesRoles": ["FAT"],
-  "losesRoles": ["CREAMED_AIR", "WATER_CONTENT"],
-  "effects": [
-    { "dimension": "RISE", "direction": "LESS" }
-  ],
-  "adjustments": [
-    { "action": "ADD_LIQUID",
-      "amount": "~15% of the butter weight" }
-  ],
-  "validFor": {
-    "excludedTechniques": ["CREAMING", "LAMINATION"]
-  },
-  "reliability": "ESTABLISHED"
-}`}</code></pre>
-          <p class="verdict">
-            <b>A ratio with a basis</b>, because 0.8 by weight is not 0.8 by volume.
-            <b>What it loses.</b> <b>What to change.</b> <b>Where it fails.</b>
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section id="demo">
-      <div class="eyebrow">Try it</div>
-      <h2>Change the situation. Watch the answer change.</h2>
-      <p class="sub">
-        This runs against the live API, with a free key by default. Ask for butter in a
-        croissant and you get nothing back, because nothing here has been verified to
-        survive lamination. Returning nothing is the feature.
-      </p>
-      <Demo client:visible />
-    </section>
-
-    <section>
-      <div class="eyebrow">Who this is for</div>
-      <h2>Four places this goes wrong today.</h2>
-      <div class="audience">
-        <div class="who">
-          <h3>Recipe and meal planning apps</h3>
-          <p>
-            You already filter by diet. The moment a user swaps an ingredient, that
-            filter is only as good as the substitution data behind it.
-          </p>
-          <span class="need">Needs: dietary constraints, ratios, failure cases</span>
-        </div>
-        <div class="who">
-          <h3>Allergy and intolerance tools</h3>
-          <p>
-            A swap that removes dairy but introduces soy or tree nut is not a safe
-            answer. Every edge declares what it introduces, not only what it removes.
-          </p>
-          <span class="need">Needs: introduced allergens, not just satisfied ones</span>
-        </div>
-        <div class="who">
-          <h3>AI cooking assistants</h3>
-          <p>
-            A language model will confidently invent a ratio. Grounding it against a
-            structured source with an explicit reliability level and recorded failures is
-            cheaper than apologising afterwards.
-          </p>
-          <span class="need">Needs: structured facts, provenance, reliability</span>
-        </div>
-        <div class="who">
-          <h3>Grocery and out of stock flows</h3>
-          <p>
-            When an item is unavailable, the replacement has to work for what the
-            customer is actually cooking, not merely be nutritionally similar.
-          </p>
-          <span class="need">Needs: context aware swaps, regional naming</span>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="eyebrow">Plans</div>
-      <h2>The price list is the schema.</h2>
-      <p class="sub">
-        Paid fields are declared on the field itself with an auth scope. A free key does
-        not get a truncated copy of the response. It gets an explicit authorization error
-        on exactly the fields it is not entitled to, and everything else still resolves.
-        Flip the toggle in the demo above and watch it happen.
-      </p>
-      <div class="plans">
-        <div class="plan">
-          <h3>Free</h3>
-          <p class="price">No signup during the preview</p>
-          <ul>
-            <li>Ingredients, taxonomy, regional names</li>
-            <li>Substitutions with ratio and basis</li>
-            <li>What each swap keeps and loses</li>
-            <li>Dietary impact, including introduced allergens</li>
-            <li>Which contexts are answerable at all</li>
-            <li class="no">Effects, adjustments, reliability</li>
-          </ul>
-        </div>
-        <div class="plan featured">
-          <h3>Developer</h3>
-          <p class="price">Pricing not live yet</p>
-          <ul>
-            <li>Everything in Free</li>
-            <li>Effects: flavour, texture, rise, browning</li>
-            <li>Adjustments, the compensating actions</li>
-            <li>Reliability of each claim</li>
-            <li>Full validity and exclusion lists</li>
-          </ul>
-        </div>
-        <div class="plan">
-          <h3>Pro</h3>
-          <p class="price">Pricing not live yet</p>
-          <ul>
-            <li>Everything in Developer</li>
-            <li>Sources behind each claim</li>
-            <li>Higher query complexity budget</li>
-            <li>Commercial data licence</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section>
-      <div class="eyebrow">Status</div>
-      <h2>Where this actually is, honestly.</h2>
-      <p class="sub">
-        An early and deliberately small dataset. Every edge is hand written and chosen
-        because context changes the answer. It is not a scrape, and it is not pretending
-        to be complete.
-      </p>
-      <div class="facts">
-        <div class="fact"><b>45</b><span>ingredients and categories</span></div>
-        <div class="fact"><b>21</b><span>substitution facts</span></div>
-        <div class="fact"><b>28</b><span>recorded failure cases</span></div>
-        <div class="fact"><b>0</b><span>scraped rows</span></div>
-      </div>
-      <div class="callout">
-        <b>What it does not cover yet:</b> broad ingredient coverage, branded products,
-        full nutrition, and most cuisines outside Europe and North America. If you ask
-        for a context that has not been tested, the API says so instead of guessing.
-        That is the one promise this project makes.
-      </div>
-      <div class="cta">
-        <a class="btn primary" href="/docs">Read the docs</a>
-        <a class="btn" href="/graphql">Open the playground</a>
-      </div>
-    </section>
-  </main>
-</Base>
+    <noscript>
+      <style>.curtain { display: none !important; } .is-hidden { display: block !important; }</style>
+    </noscript>
+  </body>
+</html>
