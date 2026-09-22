@@ -2,6 +2,34 @@
 import '../styles/organic.css';
 import '../styles/app.css';
 import App from '../components/App';
+import { INGREDIENTS, SWAPS } from '../data/swaps';
+
+const url = 'https://swaprika.nagysolution.com/';
+const image = `${url}og.png`;
+const title = 'Swaprika, what to use instead and where it works';
+const description =
+  `Out of an ingredient halfway through a recipe? Pick what you are making and what is missing, and Swaprika shows what to use instead, how much, what changes, and where the swap is known to fail. ${SWAPS.length} swaps across ${INGREDIENTS.length} ingredients.`;
+const keywords = [
+  'ingredient substitution', 'ingredient substitute', 'what can I use instead of',
+  'baking substitutions', 'cooking substitutions', 'egg substitute', 'butter substitute',
+  'buttermilk substitute', 'heavy cream substitute', 'dairy free swaps', 'vegan baking swaps',
+  'gluten free flour swap', 'recipe substitutions',
+].join(', ');
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'Swaprika',
+  url,
+  image,
+  description,
+  applicationCategory: 'LifestyleApplication',
+  operatingSystem: 'Any',
+  inLanguage: 'en',
+  isAccessibleForFree: true,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  author: { '@type': 'Person', name: 'Nandor Nagy' },
+  publisher: { '@type': 'Organization', name: 'Nagy Solution', url: 'https://nagysolution.com' },
+};
 ---
 
 <!doctype html>
@@ -9,12 +37,31 @@ import App from '../components/App';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Swaprika, what to use instead and where it works</title>
-    <meta
-      name="description"
-      content="A swap is only true somewhere. Butter becomes oil in a cake and ruins a croissant. Pick where you are cooking and what ran out, and Swaprika shows what to use instead, what it changes, and where it fails."
-    />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content={keywords} />
+    <meta name="author" content="Nandor Nagy, Nagy Solution" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={url} />
     <meta name="theme-color" content="#f5ead8" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Swaprika" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={url} />
+    <meta property="og:image" content={image} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Swaprika: what to use instead, and where it actually works." />
+    <meta property="og:locale" content="en_US" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
