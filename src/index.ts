@@ -4,6 +4,8 @@ import { createContext } from './context';
 
 export interface Env {
   DB: D1Database;
+  /** Astro build output, served by the same Worker. See web/. */
+  ASSETS: Fetcher;
 }
 
 const DEFAULT_QUERY = `# Swaprika. The query no other food API can answer.
@@ -52,9 +54,10 @@ const yoga = createYoga<ServerContext>({
 export default {
   fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const url = new URL(request.url);
-    if (url.pathname === '/') {
-      return Promise.resolve(Response.redirect(`${url.origin}/graphql`, 302));
+    if (url.pathname === '/graphql') {
+      return yoga.fetch(request, env, ctx) as Promise<Response>;
     }
-    return yoga.fetch(request, env, ctx) as Promise<Response>;
+    // Everything else is the marketing site and the docs.
+    return env.ASSETS.fetch(request);
   },
 };
