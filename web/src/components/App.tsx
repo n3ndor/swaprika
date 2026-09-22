@@ -161,8 +161,18 @@ export default function App() {
         <main className={`wrap ${screen === 'home' ? '' : 'is-hidden'}`}>
           <div className="screen-head">
             <div className="blob blob-sage" style={{ right: -40, top: -70, width: 280, height: 280 }} />
-            <Pepper size={120} wag shine className="deco" style={{ right: 30, top: -46, animation: 'sway 7s ease-in-out infinite' }} />
-            <Pepper size={54} mono="var(--color-accent-2)" noLeaf className="deco" style={{ right: 190, top: 110, opacity: .28, animation: 'drift 19s ease-in-out infinite 3s' }} />
+            {/* The pepper flies a slow loop. Its shadow runs on the same clocks with
+                every direction inverted, so it always moves against the pepper and
+                shrinks as the pepper climbs. */}
+            <div className="hero-art deco" aria-hidden="true">
+              <div className="shade"><div className="sx"><div className="sy"><div className="sb">
+                <Pepper size={96} mono="var(--color-neutral-900)" noLeaf
+                  style={{ filter: 'blur(7px)', transform: 'skewX(-14deg) scaleY(.86)' }} />
+              </div></div></div></div>
+              <div className="fly"><div className="ax"><div className="ay"><div className="ab"><div className="yaw">
+                <Pepper size={120} wag shine />
+              </div></div></div></div></div>
+            </div>
             <div className="inner">
               <p className="kicker">Start with the situation</p>
               <h1>A swap is only true somewhere.</h1>

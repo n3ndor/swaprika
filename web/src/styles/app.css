@@ -53,6 +53,27 @@
 .blob-leaf { background: var(--keeps-bg); opacity: .6; }
 .deco { position: absolute; z-index: 0; overflow: visible; }
 
+/* hero flight. Two ease-in-out swings a quarter period apart trace an ellipse;
+   a faster bob adds the ups and downs, and a yaw turns the pepper into its
+   direction of travel. The shadow shares every clock, inverted. */
+.hero-art { right: 0; top: -64px; width: 320px; height: 340px; pointer-events: none; }
+.hero-art .fly { position: absolute; right: 30px; top: 18px; }
+.hero-art .shade { position: absolute; right: 175px; top: 185px; }
+.ax { animation: ax 22s ease-in-out infinite alternate; }
+.ay { animation: ay 22s ease-in-out -11s infinite alternate; }
+.ab { animation: ab 7.5s ease-in-out infinite alternate; perspective: 600px; }
+.yaw { animation: yaw 22s ease-in-out -11s infinite alternate; }
+.sx { animation: sx 22s ease-in-out infinite alternate; }
+.sy { animation: sy 22s ease-in-out -11s infinite alternate; }
+.sb { animation: sb 7.5s ease-in-out infinite alternate; }
+@keyframes ax  { from { transform: translateX(28px); }  to { transform: translateX(-28px); } }
+@keyframes ay  { from { transform: translateY(18px); }  to { transform: translateY(-18px); } }
+@keyframes ab  { from { transform: translateY(8px) rotate(-3deg); } to { transform: translateY(-8px) rotate(3deg); } }
+@keyframes yaw { from { transform: rotateY(-26deg); }   to { transform: rotateY(26deg); } }
+@keyframes sx  { from { transform: translateX(-17px); } to { transform: translateX(17px); } }
+@keyframes sy  { from { transform: translateY(-11px) scale(1.14); opacity: .34; } to { transform: translateY(11px) scale(.84); opacity: .16; } }
+@keyframes sb  { from { transform: translateY(-5px) scale(1.06); } to { transform: translateY(5px) scale(.95); } }
+
 /* step card */
 .stepcard { background: var(--color-surface); border-radius: 40px; padding: 30px 32px 34px; margin-bottom: 46px; box-shadow: var(--shadow-sm); }
 .steprow { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
