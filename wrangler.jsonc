@@ -8,9 +8,7 @@
     {
       "binding": "DB",
       "database_name": "swaprika",
-      // Placeholder until `wrangler d1 create swaprika` is run against a real account.
-      // Local development with `wrangler dev` does not need a real id.
-      "database_id": "local-placeholder"
+      "database_id": "4a208d7c-7469-412a-9bfa-fd906d64b4fa"
     }
   ]
 }

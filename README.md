@@ -6,6 +6,10 @@ Every food API can tell you that butter can be replaced by coconut oil. None of
 them can tell you that it will ruin a croissant, that you need to put water back
 when you swap in oil, or what you give up when you do.
 
+**Try it: [swaprika.nandor-0f2.workers.dev/graphql](https://swaprika.nandor-0f2.workers.dev/graphql)**
+The playground opens on a working query. Add the header `x-api-key: dev-key` to
+unlock the paid fields.
+
 ```graphql
 query {
   ingredient(id: "butter") {
