@@ -109,7 +109,9 @@ export default function Demo() {
   const [ingredient, setIngredient] = useState('butter');
   const [presetIndex, setPresetIndex] = useState(1);
   const [vegan, setVegan] = useState(true);
-  const [plan, setPlan] = useState<Plan>('DEVELOPER');
+  // Free by default. A visitor should first see what a free key actually gets,
+  // then discover what the paid tier adds, not the other way round.
+  const [plan, setPlan] = useState<Plan>('FREE');
 
   const [edges, setEdges] = useState<Edge[] | null>(null);
   const [loading, setLoading] = useState(false);

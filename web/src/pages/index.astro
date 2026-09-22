@@ -1,287 +1,240 @@
 ---
+import Base from '../layouts/Base.astro';
 import Demo from '../components/Demo';
-import Intro from '../components/Intro';
 import { Mascot } from '../components/Mascot';
 ---
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Swaprika</title>
-    <meta
-      name="description"
-      content="A GraphQL API for context aware ingredient substitution. What can replace this ingredient, in this situation, and what changes if you do."
-    />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <noscript><style>.intro { display: none !important; }</style></noscript>
-  </head>
-
-  <body>
-    <Intro client:load />
-
-    <header class="nav">
-      <a class="brand" href="/">
-        <span class="brand-mark"><Mascot client:load mood="idle" size={30} /></span>
-        <span>Swaprika</span>
-      </a>
-      <nav>
-        <a href="/graphql">Playground</a>
-        <a href="https://nagysolution.com">More from Nagy Solution</a>
-      </nav>
-    </header>
-
-    <main>
-      <section class="hero">
-        <div class="hero-copy">
-          <h1>Butter in a cake is not<br /> butter in a croissant.</h1>
-          <p class="lede">
-            Every food API can tell you butter can be replaced by coconut oil. None of
-            them tell you it will ruin your lamination, that you have to put the water
-            back when you swap in oil, or what you give up when you do.
-          </p>
-          <p class="lede">
-            Swaprika is a GraphQL API where the substitution is a fact about
-            a <em>context</em>, not a link between two ingredients.
-          </p>
-          <div class="cta">
-            <a class="btn primary" href="#demo">Try it below</a>
-            <a class="btn" href="/graphql">Open the playground</a>
-          </div>
-        </div>
-        <div class="hero-art">
-          <Mascot client:load mood="idle" size={230} />
-        </div>
-      </section>
-
-      <section id="demo" class="demo-section">
-        <h2>Change the situation. Watch the answer change.</h2>
-        <p class="sub">
-          Pick a croissant and you will get nothing back, because no vegan fat here has
-          been verified to survive lamination. That empty result is the product.
+<Base
+  title="Swaprika, a GraphQL API for ingredient substitution that knows the context"
+  description="What can replace this ingredient, in this situation, and what changes if you do. A GraphQL API returning ratios, what the swap loses, the adjustments it needs, and the contexts where it fails."
+  page="home"
+>
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <h1>Butter in a cake is not<br /> butter in a croissant.</h1>
+        <p class="lede">
+          Swaprika is a GraphQL API for ingredient substitution. It answers what can
+          replace an ingredient <em>in a specific situation</em>, what the swap gives
+          up, and what you have to change to make it work.
         </p>
-        <Demo client:visible />
-      </section>
-
-      <section class="why">
-        <h2>Why the data sits on the edge</h2>
-        <div class="why-grid">
-          <div>
-            <h3>A pair is not a fact</h3>
-            <p>
-              Buttermilk to milk plus acid appears twice in the data. Once as a leavening
-              reagent for pancakes, once as a tenderiser in a chicken brine. Same two
-              ingredients, different job, different failure mode.
-            </p>
-          </div>
-          <div>
-            <h3>What it loses is the useful half</h3>
-            <p>
-              Swap butter for oil and you keep the fat but lose the creamed air and the
-              water. The API says so, and tells you to put about fifteen percent of the
-              butter weight back as liquid.
-            </p>
-          </div>
-          <div>
-            <h3>The price list is the schema</h3>
-            <p>
-              Paid fields are declared on the field with an auth scope. A free key
-              resolves the ratio and the roles, and gets an explicit authorization error
-              for the rest. Flip the toggle above and watch it happen.
-            </p>
-          </div>
-          <div>
-            <h3>No substitution chains</h3>
-            <p>
-              Substitutability does not compose. Butter to coconut oil to avocado oil to
-              olive oil is a pretty graph query that returns culinary nonsense, so it
-              does not exist here. Recursion lives on the taxonomy instead.
-            </p>
-          </div>
+        <div class="cta">
+          <a class="btn primary" href="#demo">Try it, no signup</a>
+          <a class="btn" href="/docs">Read the docs</a>
         </div>
-      </section>
-    </main>
+      </div>
+      <div class="hero-art">
+        <Mascot client:load mood="idle" size={230} />
+      </div>
+    </section>
 
-    <footer>
-      <p>
-        Code MIT, on <a href="https://github.com/n3ndor/swaprika">GitHub</a>.
-        Substitution data CC BY-NC-SA 4.0, commercial licence available.
-        A <a href="https://nagysolution.com">Nagy Solution</a> project.
+    <section>
+      <div class="eyebrow">The problem</div>
+      <h2>A substitution list with no context is a support ticket waiting to happen.</h2>
+      <p class="sub">
+        This is the failure every recipe app with a dietary filter eventually ships.
       </p>
-    </footer>
+      <div class="story">
+        <div class="step">
+          <span class="n">1</span>
+          <p>
+            A user with a dairy allergy opens your app and asks what to use instead of
+            butter. Your backend calls a substitution endpoint.
+          </p>
+        </div>
+        <div class="step">
+          <span class="n">2</span>
+          <p>
+            It returns a flat list: coconut oil 1:1, applesauce 1:2, olive oil 1:1. No
+            context, no conditions. Your app shows the list. It looks correct.
+          </p>
+        </div>
+        <div class="step bad">
+          <span class="n">3</span>
+          <p>
+            The user was making croissants. Coconut oil cannot laminate. The dough fails,
+            and the person blames your app, not the API you bought.
+          </p>
+        </div>
+      </div>
+    </section>
 
-    <style is:global>
-      :root {
-        --bg: #14100f;
-        --panel: #1d1817;
-        --panel-2: #241e1c;
-        --line: #392f2c;
-        --text: #f2e9e6;
-        --muted: #a2908a;
-        --red: #e04a34;
-        --green: #5aa64c;
-        --amber: #e0a33a;
-      }
-      * { box-sizing: border-box; }
-      html { scroll-behavior: smooth; }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--text);
-        font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-      }
-      a { color: inherit; }
-      h1, h2, h3 { line-height: 1.15; letter-spacing: -0.02em; margin: 0 0 0.5em; }
-      code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+    <section>
+      <div class="eyebrow">The difference</div>
+      <h2>Same question. Two answers.</h2>
+      <p class="sub">
+        Both of these answer "what replaces butter". Only one is safe to put in front of
+        a user who has not told you what they are cooking.
+      </p>
 
-      .nav {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 16px 24px; border-bottom: 1px solid var(--line);
-        position: sticky; top: 0; background: rgba(20,16,15,0.85);
-        backdrop-filter: blur(10px); z-index: 10;
-      }
-      .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; text-decoration: none; }
-      .brand-mark { display: block; width: 30px; height: 34px; }
-      .nav nav { display: flex; gap: 20px; }
-      .nav nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
-      .nav nav a:hover { color: var(--text); }
+      <div class="compare">
+        <div class="col">
+          <h4>A flat substitution endpoint</h4>
+          <pre><code>{`{
+  "ingredient": "butter",
+  "substitutes": [
+    "coconut oil (1:1)",
+    "greek yogurt (1:2)",
+    "avocado (1:1)",
+    "applesauce (1:2)"
+  ]
+}`}</code></pre>
+          <p class="verdict">
+            Four suggestions, no conditions. <b>Fine for a muffin, wrong for a croissant,
+            wrong for buttercream</b>, and nothing in the payload tells you which is
+            which.
+          </p>
+        </div>
 
-      main { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+        <div class="col ours">
+          <h4>Swaprika</h4>
+          <pre><code>{`{
+  "node": "Neutral oil",
+  "ratio": { "amount": 0.8, "basis": "WEIGHT",
+    "note": "Butter is ~80% fat, 16% water." },
+  "preservesRoles": ["FAT"],
+  "losesRoles": ["CREAMED_AIR", "WATER_CONTENT"],
+  "effects": [
+    { "dimension": "RISE", "direction": "LESS" }
+  ],
+  "adjustments": [
+    { "action": "ADD_LIQUID",
+      "amount": "~15% of the butter weight" }
+  ],
+  "validFor": {
+    "excludedTechniques": ["CREAMING", "LAMINATION"]
+  },
+  "reliability": "ESTABLISHED"
+}`}</code></pre>
+          <p class="verdict">
+            <b>A ratio with a basis</b>, because 0.8 by weight is not 0.8 by volume.
+            <b>What it loses.</b> <b>What to change.</b> <b>Where it fails.</b>
+          </p>
+        </div>
+      </div>
+    </section>
 
-      .hero {
-        display: grid; grid-template-columns: 1.4fr 1fr; gap: 40px;
-        align-items: center; padding: 72px 0 56px;
-      }
-      .hero h1 { font-size: clamp(32px, 5.2vw, 56px); }
-      .lede { color: var(--muted); font-size: 17px; max-width: 54ch; }
-      .lede em { color: var(--text); font-style: normal; border-bottom: 2px solid var(--red); }
-      .hero-art { display: flex; justify-content: center; }
-      .cta { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
-      .btn {
-        display: inline-block; padding: 11px 20px; border-radius: 10px;
-        border: 1px solid var(--line); text-decoration: none; font-size: 15px;
-        transition: transform .15s ease, background .15s ease;
-      }
-      .btn:hover { transform: translateY(-2px); background: var(--panel-2); }
-      .btn.primary { background: var(--red); border-color: var(--red); font-weight: 600; }
+    <section id="demo">
+      <div class="eyebrow">Try it</div>
+      <h2>Change the situation. Watch the answer change.</h2>
+      <p class="sub">
+        This runs against the live API, with a free key by default. Ask for butter in a
+        croissant and you get nothing back, because nothing here has been verified to
+        survive lamination. Returning nothing is the feature.
+      </p>
+      <Demo client:visible />
+    </section>
 
-      section { padding: 56px 0; }
-      section > h2 { font-size: clamp(24px, 3.4vw, 34px); }
-      .sub { color: var(--muted); max-width: 66ch; margin-top: -4px; }
+    <section>
+      <div class="eyebrow">Who this is for</div>
+      <h2>Four places this goes wrong today.</h2>
+      <div class="audience">
+        <div class="who">
+          <h3>Recipe and meal planning apps</h3>
+          <p>
+            You already filter by diet. The moment a user swaps an ingredient, that
+            filter is only as good as the substitution data behind it.
+          </p>
+          <span class="need">Needs: dietary constraints, ratios, failure cases</span>
+        </div>
+        <div class="who">
+          <h3>Allergy and intolerance tools</h3>
+          <p>
+            A swap that removes dairy but introduces soy or tree nut is not a safe
+            answer. Every edge declares what it introduces, not only what it removes.
+          </p>
+          <span class="need">Needs: introduced allergens, not just satisfied ones</span>
+        </div>
+        <div class="who">
+          <h3>AI cooking assistants</h3>
+          <p>
+            A language model will confidently invent a ratio. Grounding it against a
+            structured source with an explicit reliability level and recorded failures is
+            cheaper than apologising afterwards.
+          </p>
+          <span class="need">Needs: structured facts, provenance, reliability</span>
+        </div>
+        <div class="who">
+          <h3>Grocery and out of stock flows</h3>
+          <p>
+            When an item is unavailable, the replacement has to work for what the
+            customer is actually cooking, not merely be nutritionally similar.
+          </p>
+          <span class="need">Needs: context aware swaps, regional naming</span>
+        </div>
+      </div>
+    </section>
 
-      /* demo */
-      .demo { position: relative; margin-top: 28px; }
-      .demo-controls {
-        background: var(--panel); border: 1px solid var(--line);
-        border-radius: 14px; padding: 20px;
-      }
-      .sentence { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: clamp(18px, 2.6vw, 26px); }
-      .sentence select {
-        background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
-        border-radius: 9px; padding: 7px 12px; font-size: inherit; font-family: inherit;
-        cursor: pointer;
-      }
-      .toggles { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; align-items: center; }
-      .chip, .seg {
-        background: var(--panel-2); color: var(--muted); border: 1px solid var(--line);
-        border-radius: 999px; padding: 7px 15px; cursor: pointer; font-size: 14px;
-        font-family: inherit; transition: all .15s ease;
-      }
-      .chip.on { background: var(--green); border-color: var(--green); color: #0d1a0b; font-weight: 600; }
-      .plan-switch { display: flex; gap: 6px; margin-left: auto; }
-      .seg.on { background: var(--red); border-color: var(--red); color: #fff; font-weight: 600; }
-      .plan-note { color: var(--muted); font-size: 13px; margin: 14px 0 0; }
+    <section>
+      <div class="eyebrow">Plans</div>
+      <h2>The price list is the schema.</h2>
+      <p class="sub">
+        Paid fields are declared on the field itself with an auth scope. A free key does
+        not get a truncated copy of the response. It gets an explicit authorization error
+        on exactly the fields it is not entitled to, and everything else still resolves.
+        Flip the toggle in the demo above and watch it happen.
+      </p>
+      <div class="plans">
+        <div class="plan">
+          <h3>Free</h3>
+          <p class="price">No signup during the preview</p>
+          <ul>
+            <li>Ingredients, taxonomy, regional names</li>
+            <li>Substitutions with ratio and basis</li>
+            <li>What each swap keeps and loses</li>
+            <li>Dietary impact, including introduced allergens</li>
+            <li>Which contexts are answerable at all</li>
+            <li class="no">Effects, adjustments, reliability</li>
+          </ul>
+        </div>
+        <div class="plan featured">
+          <h3>Developer</h3>
+          <p class="price">Pricing not live yet</p>
+          <ul>
+            <li>Everything in Free</li>
+            <li>Effects: flavour, texture, rise, browning</li>
+            <li>Adjustments, the compensating actions</li>
+            <li>Reliability of each claim</li>
+            <li>Full validity and exclusion lists</li>
+          </ul>
+        </div>
+        <div class="plan">
+          <h3>Pro</h3>
+          <p class="price">Pricing not live yet</p>
+          <ul>
+            <li>Everything in Developer</li>
+            <li>Sources behind each claim</li>
+            <li>Higher query complexity budget</li>
+            <li>Commercial data licence</li>
+          </ul>
+        </div>
+      </div>
+    </section>
 
-      .demo-body { display: grid; grid-template-columns: 1fr 1.15fr; gap: 18px; margin-top: 18px; }
-      .panel-label {
-        text-transform: uppercase; letter-spacing: 0.09em; font-size: 11px;
-        color: var(--muted); margin-bottom: 10px;
-      }
-      .demo-query {
-        background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px;
-      }
-      .demo-query pre { margin: 0; overflow-x: auto; }
-      .demo-query code { font-size: 12.5px; line-height: 1.65; color: #cbb8b2; white-space: pre; }
-
-      .demo-results { display: flex; flex-direction: column; gap: 12px; }
-      .card {
-        background: var(--panel); border: 1px solid var(--line);
-        border-radius: 14px; padding: 16px 18px;
-      }
-      .card header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-      .card h3 { margin: 0; font-size: 18px; }
-      .ratio { color: var(--amber); font-size: 13px; font-family: ui-monospace, monospace; white-space: nowrap; }
-      .note { color: var(--muted); font-size: 13px; margin: 8px 0 0; }
-      .roles { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-      .tag { font-size: 11.5px; padding: 3px 9px; border-radius: 999px; border: 1px solid; }
-      .tag.keeps { color: var(--green); border-color: #2f5e27; background: #16240f; }
-      .tag.loses { color: #ef8a78; border-color: #5e2f27; background: #26110f; }
-      .effect, .adjust { font-size: 13.5px; margin: 10px 0 0; color: #d9c8c3; }
-      .adjust { color: var(--amber); }
-      .locked {
-        margin-top: 12px; padding: 9px 12px; border-radius: 9px;
-        border: 1px dashed var(--line); color: var(--muted); font-size: 12.5px;
-      }
-      .rel {
-        display: inline-block; margin-top: 12px; font-size: 11px; letter-spacing: .06em;
-        text-transform: uppercase; padding: 3px 9px; border-radius: 6px;
-        background: var(--panel-2); color: var(--muted);
-      }
-      .rel.established { color: var(--green); }
-      .rel.contested { color: #ef8a78; }
-
-      .empty {
-        display: flex; flex-direction: column; align-items: center; text-align: center;
-        gap: 6px; padding: 28px 20px; background: var(--panel);
-        border: 1px dashed var(--line); border-radius: 14px;
-      }
-      .empty p { margin: 6px 0 0; font-size: 16px; }
-      .empty small { color: var(--muted); max-width: 40ch; }
-
-      .demo-mascot { position: absolute; right: -10px; top: -96px; pointer-events: none; }
-
-      .why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 26px; margin-top: 26px; }
-      .why-grid h3 { font-size: 17px; color: var(--red); }
-      .why-grid p { color: var(--muted); font-size: 15px; margin: 0; }
-
-      footer {
-        border-top: 1px solid var(--line); margin-top: 40px; padding: 26px 24px;
-        color: var(--muted); font-size: 13.5px; text-align: center;
-      }
-
-      /* click to enter gate */
-      .intro {
-        position: fixed; inset: 0; z-index: 100; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        background: radial-gradient(60% 60% at 50% 42%, #221a18 0%, var(--bg) 70%);
-      }
-      .intro-inner { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px; }
-      .intro-title { font-size: clamp(38px, 8vw, 72px); margin: 18px 0 6px; letter-spacing: -0.03em; }
-      .intro-tag { color: var(--muted); margin: 0 0 30px; font-size: clamp(14px, 2.2vw, 17px); }
-      .intro-btn {
-        background: var(--red); color: #fff; border: none; border-radius: 999px;
-        padding: 14px 34px; font-size: 16px; font-weight: 600; font-family: inherit;
-        cursor: pointer; transition: transform .15s ease, box-shadow .15s ease;
-        box-shadow: 0 8px 30px rgba(224, 74, 52, 0.28);
-      }
-      .intro-btn:hover { transform: translateY(-2px) scale(1.03); }
-      .intro-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
-
-      /* dead end options */
-      .sentence select option:disabled { color: #6b5b56; }
-
-      @media (max-width: 860px) {
-        .hero { grid-template-columns: 1fr; padding-top: 40px; }
-        .hero-art { order: -1; }
-        .demo-body { grid-template-columns: 1fr; }
-        .why-grid { grid-template-columns: 1fr; }
-        .demo-mascot { display: none; }
-        .plan-switch { margin-left: 0; }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-      }
-    </style>
-  </body>
-</html>
+    <section>
+      <div class="eyebrow">Status</div>
+      <h2>Where this actually is, honestly.</h2>
+      <p class="sub">
+        An early and deliberately small dataset. Every edge is hand written and chosen
+        because context changes the answer. It is not a scrape, and it is not pretending
+        to be complete.
+      </p>
+      <div class="facts">
+        <div class="fact"><b>45</b><span>ingredients and categories</span></div>
+        <div class="fact"><b>21</b><span>substitution facts</span></div>
+        <div class="fact"><b>28</b><span>recorded failure cases</span></div>
+        <div class="fact"><b>0</b><span>scraped rows</span></div>
+      </div>
+      <div class="callout">
+        <b>What it does not cover yet:</b> broad ingredient coverage, branded products,
+        full nutrition, and most cuisines outside Europe and North America. If you ask
+        for a context that has not been tested, the API says so instead of guessing.
+        That is the one promise this project makes.
+      </div>
+      <div class="cta">
+        <a class="btn primary" href="/docs">Read the docs</a>
+        <a class="btn" href="/graphql">Open the playground</a>
+      </div>
+    </section>
+  </main>
+</Base>
