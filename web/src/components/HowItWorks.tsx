@@ -7,28 +7,36 @@ type Try = (sit: string, ing: string) => void;
 const worksFor = (sit: string, ing: string) =>
   SWAPS.filter((s) => s.from === ing && s.ok.includes(sit)).length;
 
+const labelOf = (code: string) => SITUATIONS.flatMap((g) => g.items).find((x) => x[0] === code)?.[1] ?? code;
+
 const TryBtn = ({ sit, ing, onTry, children }: { sit: string; ing: string; onTry: Try; children: string }) => (
   <button type="button" className="trybtn" onClick={() => onTry(sit, ing)}>
     {children} &rarr;
   </button>
 );
 
-const FACTS: { text: string; sit: string; ing: string }[] = [
+/** Every fact opens a case where the swap works, so the link always lands on cards. */
+export const FACTS: { text: string; sit: string; ing: string }[] = [
   { text: 'Sunflower seed butter can turn the inside of a cookie green when it meets baking soda. It is harmless, and a squeeze of lemon stops it.', sit: 'COOKIE', ing: 'peanut-butter' },
   { text: 'Honey browns much faster than sugar. Swap it in and drop the oven by about 15 C, or the outside burns before the middle sets.', sit: 'CAKE', ing: 'sugar' },
   { text: 'Agar only sets after a full boil. Gelatin is the opposite: boil it and it stops setting.', sit: 'SET_DESSERT', ing: 'gelatin' },
   { text: 'Fresh yeast is used at about two and a half times the weight of dry yeast.', sit: 'BREAD', ing: 'yeast' },
   { text: 'Cornstarch thickens twice as hard as flour, but thins out again if it boils for too long.', sit: 'THICKENING', ing: 'wheat-flour' },
-  { text: 'Dried herbs are used at a third of the fresh amount. In a pesto they do not work at all.', sit: 'PESTO', ing: 'fresh-herbs' },
+  { text: 'Dried herbs are used at a third of the fresh amount, and they go in early. Fresh ones go in at the end.', sit: 'SOUP', ing: 'fresh-herbs' },
   { text: 'Butter is about 16 percent water. Swap it for oil and you have to put that water back.', sit: 'CAKE', ing: 'butter' },
-  { text: 'Coconut oil turns solid below about 24 C, so it seizes into lumps in a cold dressing.', sit: 'VINAIGRETTE', ing: 'vegetable-oil' },
+  { text: 'Melted coconut oil works in place of vegetable oil in a cake, but it sets below about 24 C, so keep everything at room temperature.', sit: 'CAKE', ing: 'vegetable-oil' },
 ];
 
-export default function HowItWorks({ onTry }: { onTry: Try }) {
+/** Every "Show me" target on this page, so a check can prove each one lands on cards. */
+export const HOW_TARGETS: [string, string][] = [
+  ['PANCAKE', 'buttermilk'], ['CROISSANT', 'yeast'], ['FRIED_CHICKEN', 'buttermilk'],
+  ['THICKENING', 'wheat-flour'], ['DEEP_FRYING', 'wheat-flour'],
+  ...FACTS.map((f): [string, string] => [f.sit, f.ing]),
+];
+
+export default function HowItWorks({ onTry, dishes }: { onTry: Try; dishes: number }) {
   const sample = SWAPS.find((s) => s.from === 'butter' && s.to === 'Neutral oil')!;
   const [flipped, setFlipped] = useState(true);
-  const failures = SWAPS.reduce((n, s) => n + s.no.length, 0);
-  const dishes = SITUATIONS.reduce((n, g) => n + g.items.length, 0) - 1;
 
   return (
     <div className="how">
@@ -54,7 +62,7 @@ export default function HowItWorks({ onTry }: { onTry: Try }) {
           <div className="step3">
             <span className="stepnum">2</span>
             <h3>Say what is missing</h3>
-            <p>Only the ingredients that matter for that dish are shown. The number on each one is how many swaps work there.</p>
+            <p>Only the ingredients that have a swap for that dish are offered. The number on each one is how many swaps work there.</p>
           </div>
           <div className="step3">
             <span className="stepnum">3</span>
@@ -69,7 +77,7 @@ export default function HowItWorks({ onTry }: { onTry: Try }) {
         <div className="anatomy">
           <div className="anatomy-card">
             <SwapCard swap={sample} fromName="Butter" flipped={flipped} onFlip={() => setFlipped((f) => !f)} annotate
-              avoid={sample.no.map((c) => SITUATIONS.flatMap((g) => g.items).find((x) => x[0] === c)?.[1] ?? c)} />
+              avoid={sample.no.map(labelOf)} />
           </div>
           <ol className="anatomy-list">
             <li><b>The flip.</b> What you had on one side, what to use on the other. The arrow turns it back and forth.</li>
@@ -80,7 +88,7 @@ export default function HowItWorks({ onTry }: { onTry: Try }) {
               <span className="rel situational">{REL.SITUATIONAL.label}</span> {REL.SITUATIONAL.hint}{' '}
               <span className="rel contested">{REL.CONTESTED.label}</span> {REL.CONTESTED.hint}
             </li>
-            <li><b>What it keeps and loses.</b> Every ingredient does jobs in a dish. This shows which jobs survive the swap. The loses list is usually the one that matters. Underneath, <b>Not for</b> lists the dishes where the swap is known to fail.</li>
+            <li><b>What it keeps and loses.</b> Every ingredient does jobs in a dish. This shows which jobs survive the swap. The loses list is usually the one that matters. Underneath, <b>Not for</b> lists dishes where you should not use this swap.</li>
             <li><b>What changes.</b> Flavour, texture, rise, browning and colour, described in words rather than scores.</li>
             <li><b>What to adjust.</b> The fix that makes the swap work, such as putting water back or lowering the oven.</li>
           </ol>
@@ -88,22 +96,25 @@ export default function HowItWorks({ onTry }: { onTry: Try }) {
       </section>
 
       <section className="how-section">
-        <h2>Three kinds of answer</h2>
+        <h2>Only what works is shown</h2>
+        <p className="how-say">
+          Every card on the page is a swap you can actually use for the dish you picked. If an
+          ingredient has no good swap there, it is simply not offered, instead of handing you
+          something that looks right and ruins the recipe.
+        </p>
         <div className="answers">
           <div className="answer works">
-            <h3>It works</h3>
-            <p>Pancakes without buttermilk: {worksFor('PANCAKE', 'buttermilk')} swaps that hold up, from kefir to milk with a spoon of lemon.</p>
+            <h3>Pancakes without buttermilk</h3>
+            <p>{worksFor('PANCAKE', 'buttermilk')} swaps that hold up, from kefir to milk with a spoon of lemon.</p>
             <TryBtn sit="PANCAKE" ing="buttermilk" onTry={onTry}>Show me</TryBtn>
           </div>
-          <div className="answer fails">
-            <h3>It is known to fail</h3>
-            <p>A croissant without butter. Coconut oil, neutral oil and vegan butter are all recorded as failing there, and nothing is recorded as working. The honest answer is: do not.</p>
-            <TryBtn sit="CROISSANT" ing="butter" onTry={onTry}>Show me</TryBtn>
-          </div>
-          <div className="answer nothing">
-            <h3>Nothing on file</h3>
-            <p>Soda bread without butter. Nobody has written that one down yet, so the page says so instead of guessing.</p>
-            <TryBtn sit="SODA_BREAD" ing="butter" onTry={onTry}>Show me</TryBtn>
+          <div className="answer works">
+            <h3>A croissant</h3>
+            <p>
+              Only the yeast can be swapped. Nothing replaces the butter in laminated dough, so butter
+              is not even offered.
+            </p>
+            <TryBtn sit="CROISSANT" ing="yeast" onTry={onTry}>Show me</TryBtn>
           </div>
         </div>
       </section>
@@ -150,15 +161,14 @@ export default function HowItWorks({ onTry }: { onTry: Try }) {
         <h2>Where this comes from</h2>
         <p className="how-say">
           Every swap is written by hand from common, well established kitchen knowledge, the kind of
-          advice you find in a good cookbook, and then tied to the dishes it suits and the ones it
-          does not. None of it has been lab tested. Taste as you go. If you are cooking for someone
-          with an allergy, read every label: a swap that removes dairy can bring in soy or nuts.
+          advice you find in a good cookbook, and then tied to the dishes it suits. None of it has
+          been lab tested. Taste as you go. If you are cooking for someone with an allergy, read
+          every label: a swap that removes dairy can bring in soy or nuts.
         </p>
-        <div className="stats">
+        <div className="stats stats3">
           <div><b>{INGREDIENTS.length}</b><span>ingredients</span></div>
           <div><b>{SWAPS.length}</b><span>swaps</span></div>
           <div><b>{dishes}</b><span>dishes and techniques</span></div>
-          <div><b>{failures}</b><span>recorded failures</span></div>
         </div>
       </section>
     </div>

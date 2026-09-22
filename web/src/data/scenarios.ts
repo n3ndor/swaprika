@@ -1,7 +1,6 @@
 /**
- * Ready made questions for the "Try one" row. A new random set is drawn on
- * every visit: seven that have working swaps and one that is known to fail,
- * so every set shows both kinds of answer.
+ * Ready made questions for the "Try one" row. A new random set of eight is
+ * drawn on every visit. Every question has at least one swap that works.
  */
 export interface Scenario {
   text: string;
@@ -40,14 +39,6 @@ export const WORKING: Scenario[] = [
   { text: 'Sushi rice, but no rice vinegar', sit: 'SUSHI_RICE', ing: 'rice-vinegar' },
 ];
 
-export const FAILING: Scenario[] = [
-  { text: 'Croissants, but no butter', sit: 'CROISSANT', ing: 'butter' },
-  { text: 'Caramel, but no sugar', sit: 'CARAMELISATION', ing: 'sugar' },
-  { text: 'A meringue, but no sugar', sit: 'MERINGUE', ing: 'sugar' },
-  { text: 'Pesto, but no fresh herbs', sit: 'PESTO', ing: 'fresh-herbs' },
-  { text: 'A stir fry, but no fresh garlic', sit: 'STIR_FRY', ing: 'garlic' },
-];
-
 const shuffle = <T,>(xs: T[]) => {
   const a = [...xs];
   for (let i = a.length - 1; i > 0; i--) {
@@ -58,8 +49,7 @@ const shuffle = <T,>(xs: T[]) => {
 };
 
 /** Fixed set for the server render, so the HTML is stable. */
-export const DEFAULT_PICKS: Scenario[] = [...WORKING.slice(0, 7), FAILING[0]];
+export const DEFAULT_PICKS: Scenario[] = WORKING.slice(0, 8);
 
-/** Seven working questions and one known failure, in random order. */
-export const pickScenarios = (): Scenario[] =>
-  shuffle([...shuffle(WORKING).slice(0, 7), shuffle(FAILING)[0]]);
+/** Eight different questions, in random order. */
+export const pickScenarios = (): Scenario[] => shuffle(WORKING).slice(0, 8);

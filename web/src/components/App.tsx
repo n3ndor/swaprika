@@ -1,16 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pepper } from './Pepper';
-import { EM, MIDDOT, SwapCard, sentence } from './SwapCard';
+import { MIDDOT, SwapCard, sentence } from './SwapCard';
 import HowItWorks from './HowItWorks';
 import { INGREDIENTS, INGREDIENT_GROUPS, SITUATIONS, SWAPS, type Swap } from '../data/swaps';
-import { FAIL_WHY, whyKey } from '../data/why';
 import { DEFAULT_PICKS, pickScenarios } from '../data/scenarios';
 
 type Screen = 'home' | 'browse' | 'how';
-
-const SITS = SITUATIONS;
-const TECHNIQUE_GROUP = SITS.findIndex((g) => g.g === 'Technique');
-const DISHES = SITS.reduce((n, g) => n + g.items.length, 0) - 1;
 
 const WORD: [string, string][] = [
   ['S', 'ugar'], ['w', 'heat flour'], ['a', 'quafaba'], ['p', 'aprika'],
@@ -29,8 +24,21 @@ interface Ing {
 const PANTRY: Ing[] = INGREDIENTS.map((i) => ({ ...i, subs: SWAPS.filter((s) => s.from === i.id) }));
 const TOTAL_SWAPS = SWAPS.length;
 
+const worksIn = (p: Ing, code: string) =>
+  p.subs.filter((s) => code === 'ANY' || s.ok.includes(code)).length;
+
+/**
+ * Only what works is offered. A dish is listed only if at least one swap works
+ * there, and a group only if it still has a dish left.
+ */
+const SITS = SITUATIONS
+  .map((g) => ({ ...g, items: g.items.filter(([code]) => code === 'ANY' || PANTRY.some((p) => worksIn(p, code) > 0)) }))
+  .filter((g) => g.items.length > 0);
+const TECHNIQUE_GROUP = SITS.findIndex((g) => g.g === 'Technique');
+const DISHES = SITS.reduce((n, g) => n + g.items.length, 0) - 1;
+
 const labelOf = (code: string) => {
-  for (const g of SITS) for (const it of g.items) if (it[0] === code) return it[1];
+  for (const g of SITUATIONS) for (const it of g.items) if (it[0] === code) return it[1];
   return '';
 };
 const groupOf = (code: string) => SITS.findIndex((g) => g.items.some((x) => x[0] === code));
@@ -45,7 +53,6 @@ export default function App() {
   const [sit, setSit] = useState('CAKE');
   const [tab, setTab] = useState(1);
   const [ing, setIng] = useState('butter');
-  const [showAll, setShowAll] = useState(false);
   // The server renders a fixed set so the HTML is stable; a random set is drawn
   // as soon as the page runs, which happens behind the cover.
   const [picks, setPicks] = useState(DEFAULT_PICKS);
@@ -131,29 +138,31 @@ export default function App() {
     () => (current?.subs ?? []).filter((s) => sit === 'ANY' || s.ok.includes(sit)),
     [current, sit],
   );
-  const failing = useMemo(
-    () => (sit === 'ANY' ? [] : (current?.subs ?? []).filter((s) => s.no.includes(sit))),
-    [current, sit],
-  );
   const lowerName = (current?.name ?? '').toLowerCase();
   const phrase = sit === 'ANY' ? '' : (groupOf(sit) === TECHNIQUE_GROUP ? `when ${labelOf(sit)}` : `in ${labelOf(sit)}`);
 
-  // Step 2 shows only the ingredients that have something on file for this dish.
-  const chips = useMemo(() => PANTRY.map((p) => ({
-    p,
-    works: p.subs.filter((s) => sit === 'ANY' || s.ok.includes(sit)).length,
-    fails: sit !== 'ANY' && p.subs.some((s) => s.no.includes(sit)),
-  })), [sit]);
-  const relevant = chips.filter((c) => c.works || c.fails);
-  const hidden = chips.filter((c) => !c.works && !c.fails);
-  const visibleChips = showAll ? chips : [...relevant, ...hidden.filter((c) => c.p.id === ing)];
+  // Step 2 offers only the ingredients that have a working swap for this dish.
+  const chips = useMemo(
+    () => PANTRY.map((p) => ({ p, works: worksIn(p, sit) })).filter((c) => c.works > 0),
+    [sit],
+  );
+
+  /** Choosing a dish keeps the ingredient if it still applies, otherwise takes the first one that does. */
+  const chooseSit = (code: string) => {
+    setSit(code);
+    const cur = PANTRY.find((p) => p.id === ing);
+    if (!cur || worksIn(cur, code) === 0) {
+      const first = PANTRY.find((p) => worksIn(p, code) > 0);
+      if (first) setIng(first.id);
+    }
+    stage();
+  };
 
   const jump = useCallback((s: string, i: string) => {
     const g = groupOf(s);
     if (g >= 0) setTab(g);
     setSit(s);
     setIng(i);
-    setShowAll(false);
     setScreen('home');
     stage();
     setTimeout(() => resultsEl.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
@@ -185,9 +194,7 @@ export default function App() {
   const current_ = (s: Screen) => ({ 'aria-current': (screen === s ? 'page' : undefined) as 'page' | undefined });
 
   const heading = sit === 'ANY' ? `Out of ${lowerName}?` : `${making(sit)} without ${lowerName}`;
-  const countText = results.length
-    ? `${results.length} ${results.length === 1 ? 'swap works' : 'swaps work'}${phrase ? ` ${phrase}` : ''}`
-    : failing.length ? 'nothing works here' : 'nothing on file';
+  const countText = `${results.length} ${results.length === 1 ? 'swap works' : 'swaps work'}${phrase ? ` ${phrase}` : ''}`;
 
   return (
     <div className="shell">
@@ -233,9 +240,9 @@ export default function App() {
               <h1>A swap is only true somewhere.</h1>
               <p className="say">
                 Out of eggs halfway through the brownies? No buttermilk for the pancakes? Tell
-                Swaprika what you are making and what is missing. It tells you what to use
-                instead, how much of it, what will turn out different, and what to change so the
-                dish still works. When nothing works, it says that too.
+                Swaprika what you are making and what is missing. It shows only the swaps that
+                work for that dish: what to use instead, how much of it, what will turn out
+                different, and what to change so it still works.
               </p>
             </div>
             <div className="tryrow">
@@ -263,8 +270,7 @@ export default function App() {
             </div>
             <div className="chiprow">
               {SITS[tab].items.map(([code, label]) => (
-                <button key={code} className="pill" aria-pressed={sit === code}
-                  onClick={() => { setSit(code); setShowAll(false); stage(); }}>
+                <button key={code} className="pill" aria-pressed={sit === code} onClick={() => chooseSit(code)}>
                   {label}
                 </button>
               ))}
@@ -274,24 +280,17 @@ export default function App() {
               <span className="stepnum">2</span>
               <h2>What is missing?</h2>
               <span className="stephint">
-                {sit === 'ANY'
-                  ? 'pick anything from the pantry'
-                  : `showing the ${relevant.length} that matter ${phrase}, the number is how many swaps work`}
+                {sit === 'ANY' ? 'pick anything from the pantry' : `the number is how many swaps work ${phrase}`}
               </span>
             </div>
             <div className="chiprow last">
-              {visibleChips.map(({ p, works, fails }) => (
-                <button key={p.id} className={`pill ing${works ? '' : ' dead'}`} aria-pressed={ing === p.id}
+              {chips.map(({ p, works }) => (
+                <button key={p.id} className="pill ing" aria-pressed={ing === p.id}
                   onClick={() => { setIng(p.id); stage(); }}>
                   {p.name}
-                  <span className="hint">{works ? works : fails ? 'fails' : EM}</span>
+                  <span className="hint">{works}</span>
                 </button>
               ))}
-              {sit !== 'ANY' && hidden.length > 0 && (
-                <button className="morebtn" onClick={() => setShowAll((v) => !v)}>
-                  {showAll ? 'Show only what matters' : `+ ${hidden.length} more, nothing on file ${phrase}`}
-                </button>
-              )}
             </div>
           </section>
 
@@ -320,30 +319,7 @@ export default function App() {
                 </div>
               </>
             ) : (
-              <div className="empty-state">
-                <div className="empty-mark">{EM}</div>
-                <h3>{failing.length ? 'Known to fail here.' : 'Nothing on file.'}</h3>
-                {failing.length ? (
-                  <>
-                    <p>
-                      This is on record as a bad idea, not a gap. Most swap lists would still hand
-                      you something here and ruin the dish. What fails, and why:
-                    </p>
-                    <ul className="fail-list">
-                      {failing.map((s) => (
-                        <li key={s.to}>
-                          <b>{s.to}.</b> {FAIL_WHY[whyKey(s.from, s.to)]}
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : (
-                  <p>No swap for {lowerName} is recorded {phrase}. Saying nothing beats guessing.</p>
-                )}
-                <button className="trybtn" onClick={() => { setSit('ANY'); setTab(0); setShowAll(false); stage(); }}>
-                  See every swap for {lowerName} &rarr;
-                </button>
-              </div>
+              <p className="results-tip">Pick what is missing above to see the swaps.</p>
             )}
           </section>
         </main>
@@ -355,8 +331,8 @@ export default function App() {
             <p className="kicker" style={{ position: 'relative', zIndex: 1 }}>The pantry</p>
             <h1>{PANTRY.length} ingredients, {TOTAL_SWAPS} swaps.</h1>
             <p>
-              Pick anything you have run out of to see every swap on file for it, from the dishes
-              where it works to the ones where it is known to fail.
+              Pick anything you have run out of to see every swap on file for it, and the dishes
+              each one works in.
             </p>
           </div>
           {INGREDIENT_GROUPS.map((g) => (
@@ -385,7 +361,7 @@ export default function App() {
 
         {/* HOW IT WORKS */}
         <main className={`wrap ${screen === 'how' ? '' : 'is-hidden'}`}>
-          <HowItWorks onTry={jump} />
+          <HowItWorks onTry={jump} dishes={DISHES} />
         </main>
 
         <footer className="foot">
