@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pepper } from './Pepper';
-import { DOCS, DOC_GROUPS, type Doc } from '../data/docs';
 import { INGREDIENTS, SITUATIONS, SWAPS, type Swap } from '../data/swaps';
 
 /** The design sets copy with em dashes; repo style bans the literal glyph. */
 const EM = String.fromCharCode(0x2014);
 const MIDDOT = String.fromCharCode(0x00b7);
 
-type Screen = 'home' | 'browse' | 'docs' | 'doc';
+type Screen = 'home' | 'browse';
 
 const SITS = SITUATIONS;
 const TECHNIQUE_GROUP = SITS.findIndex((g) => g.g === 'Technique');
@@ -41,7 +40,6 @@ export default function App() {
   const [tab, setTab] = useState(1);
   const [ing, setIng] = useState('butter');
   const [flipped, setFlipped] = useState(false);
-  const [docId, setDocId] = useState<string | null>(null);
   const [letter, setLetter] = useState(0);
 
   const resultsEl = useRef<HTMLElement | null>(null);
@@ -53,30 +51,20 @@ export default function App() {
     return () => clearInterval(t);
   }, []);
 
-  // Deep links, so a shared document link skips the curtain.
+  // A link to #find or #pantry skips the curtain.
   useEffect(() => {
     const h = window.location.hash.replace(/^#/, '');
-    if (!h) return;
-    setGone(true);
-    if (h.startsWith('doc/')) {
-      const id = h.slice(4);
-      if (DOCS.some((d) => d.id === id)) {
-        setDocId(id);
-        setScreen('doc');
-      }
-    } else if (h === 'pantry') setScreen('browse');
-    else if (h === 'docs') setScreen('docs');
+    if (h === 'find' || h === 'pantry') {
+      setGone(true);
+      if (h === 'pantry') setScreen('browse');
+    }
   }, []);
 
   useEffect(() => {
     if (!gone) return;
-    const h =
-      screen === 'doc' && docId ? `#doc/${docId}`
-      : screen === 'docs' ? '#docs'
-      : screen === 'browse' ? '#pantry'
-      : '#find';
+    const h = screen === 'browse' ? '#pantry' : '#find';
     if (window.location.hash !== h) window.history.replaceState(null, '', h);
-  }, [screen, docId, gone]);
+  }, [screen, gone]);
 
   // The reveal: hold the "you had" face until the cards are actually on screen.
   const maybeStart = useCallback(() => {
@@ -136,8 +124,6 @@ export default function App() {
     stage();
   }, [stage]);
 
-  const openDoc = (d: Doc) => { setDocId(d.id); setScreen('doc'); window.scrollTo(0, 0); };
-  const activeDoc = DOCS.find((d) => d.id === docId) ?? DOCS[0];
   const nav = (k: Screen) => ({ 'aria-current': (screen === k ? 'page' : undefined) as 'page' | undefined });
 
   return (
@@ -154,11 +140,8 @@ export default function App() {
             <nav className="mainnav">
               <button className="navbtn" {...nav('home')} onClick={() => { setScreen('home'); stage(); }}>Find a swap</button>
               <button className="navbtn" {...nav('browse')} onClick={() => setScreen('browse')}>Ingredients</button>
-              <button className="navbtn" {...nav('docs')} onClick={() => setScreen('docs')}>Documents</button>
-              <a className="devlink" href="/graphql">For developers &#8599;</a>
               <span className="navsep" />
               <button className="coverbtn" title="Back to the cover" onClick={toCover}>&#8593; Cover</button>
-              <button className="signin" title="Sign in is not built yet" aria-disabled="true">Sign in</button>
             </nav>
           </div>
         </header>
@@ -325,51 +308,12 @@ export default function App() {
           </div>
         </main>
 
-        {/* DOCUMENTS */}
-        <main className={`wrap ${screen === 'docs' ? '' : 'is-hidden'}`}>
-          <div className="head-sm" style={{ maxWidth: '46ch', marginBottom: 30 }}>
-            <p className="kicker">Open by default</p>
-            <h1>Every document, in the open.</h1>
-            <p>The guide, the decisions behind the model, the schema and both licences. No account needed to read any of it.</p>
-          </div>
-          {DOC_GROUPS.map((g) => (
-            <section key={g.name} style={{ marginBottom: 30 }}>
-              <p className="group-label">{g.name}</p>
-              <div className="grid-docs">
-                {g.items.map((d) => (
-                  <button key={d.id} className="tile doc" onClick={() => openDoc(d)}>
-                    <span className="doc-kicker">{d.kicker}</span>
-                    <span className="doc-title">{d.title}</span>
-                    <span className="doc-sum">{d.summary}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          ))}
-        </main>
-
-        {/* ONE DOCUMENT */}
-        <main className={`wrap ${screen === 'doc' ? '' : 'is-hidden'}`} style={{ paddingTop: 34 }}>
-          <button className="backlink" onClick={() => setScreen('docs')}>&larr; All documents</button>
-          <article className="reader">
-            <p className="kicker">{activeDoc.kicker}</p>
-            <h1>{activeDoc.title}</h1>
-            {activeDoc.blocks.map((b) => (
-              <section key={b.h}>
-                <h2>{b.h}</h2>
-                {b.ps.map((p) => <p key={p.slice(0, 40)}>{p}</p>)}
-                {b.code && <pre><code>{b.code}</code></pre>}
-              </section>
-            ))}
-          </article>
-        </main>
-
         <footer className="foot">
           <div className="foot-in">
             <button onClick={toCover}>&#8593; Back to the cover</button>
-            <span>Swaprika {MIDDOT} context aware ingredient substitution</span>
+            <span>Swaprika {MIDDOT} what to use instead, and where it works</span>
             <span>
-              Code MIT {MIDDOT} Data CC BY-NC-SA 4.0 {MIDDOT}{' '}
+              A <a href="https://nagysolution.com">Nagy Solution</a> project {MIDDOT}{' '}
               <a href="https://github.com/n3ndor/swaprika">source</a>
             </span>
           </div>
@@ -413,7 +357,7 @@ export default function App() {
                 <path d="M5 12h13" /><path d="m12 5 7 7-7 7" />
               </svg>
             </button>
-            <span className="enter-note">A sign in will live here later</span>
+            <a className="enter-note" href="https://nagysolution.com">A Nagy Solution project</a>
           </div>
         </div>
       </div>
