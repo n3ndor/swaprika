@@ -1,5 +1,6 @@
 ---
 import Demo from '../components/Demo';
+import Intro from '../components/Intro';
 import { Mascot } from '../components/Mascot';
 ---
 
@@ -14,9 +15,12 @@ import { Mascot } from '../components/Mascot';
       content="A GraphQL API for context aware ingredient substitution. What can replace this ingredient, in this situation, and what changes if you do."
     />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <noscript><style>.intro { display: none !important; }</style></noscript>
   </head>
 
   <body>
+    <Intro client:load />
+
     <header class="nav">
       <a class="brand" href="/">
         <span class="brand-mark"><Mascot client:load mood="idle" size={30} /></span>
@@ -24,7 +28,7 @@ import { Mascot } from '../components/Mascot';
       </a>
       <nav>
         <a href="/graphql">Playground</a>
-        <a href="https://github.com/n3ndor/swaprika">GitHub</a>
+        <a href="https://nagysolution.com">More from Nagy Solution</a>
       </nav>
     </header>
 
@@ -101,8 +105,9 @@ import { Mascot } from '../components/Mascot';
 
     <footer>
       <p>
-        Code MIT. Substitution data CC BY-NC-SA 4.0, commercial licence available.
-        Built by <a href="https://github.com/n3ndor">Nandor Nagy</a>.
+        Code MIT, on <a href="https://github.com/n3ndor/swaprika">GitHub</a>.
+        Substitution data CC BY-NC-SA 4.0, commercial licence available.
+        A <a href="https://nagysolution.com">Nagy Solution</a> project.
       </p>
     </footer>
 
@@ -244,6 +249,27 @@ import { Mascot } from '../components/Mascot';
         border-top: 1px solid var(--line); margin-top: 40px; padding: 26px 24px;
         color: var(--muted); font-size: 13.5px; text-align: center;
       }
+
+      /* click to enter gate */
+      .intro {
+        position: fixed; inset: 0; z-index: 100; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        background: radial-gradient(60% 60% at 50% 42%, #221a18 0%, var(--bg) 70%);
+      }
+      .intro-inner { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 24px; }
+      .intro-title { font-size: clamp(38px, 8vw, 72px); margin: 18px 0 6px; letter-spacing: -0.03em; }
+      .intro-tag { color: var(--muted); margin: 0 0 30px; font-size: clamp(14px, 2.2vw, 17px); }
+      .intro-btn {
+        background: var(--red); color: #fff; border: none; border-radius: 999px;
+        padding: 14px 34px; font-size: 16px; font-weight: 600; font-family: inherit;
+        cursor: pointer; transition: transform .15s ease, box-shadow .15s ease;
+        box-shadow: 0 8px 30px rgba(224, 74, 52, 0.28);
+      }
+      .intro-btn:hover { transform: translateY(-2px) scale(1.03); }
+      .intro-btn:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+      /* dead end options */
+      .sentence select option:disabled { color: #6b5b56; }
 
       @media (max-width: 860px) {
         .hero { grid-template-columns: 1fr; padding-top: 40px; }

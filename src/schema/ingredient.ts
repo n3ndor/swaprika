@@ -73,6 +73,35 @@ DietaryImpact.implement({
   }),
 });
 
+const AvailableContexts = builder.objectRef<{
+  techniques: string[];
+  dishTypes: string[];
+  failingTechniques: string[];
+  failingDishTypes: string[];
+  total: number;
+}>('AvailableContexts');
+AvailableContexts.implement({
+  description:
+    'Which questions this ingredient can answer. There are three states, not two: a context that works, a context we have positively recorded as failing, and a context we simply have no data for. A client should offer the first two and grey out the third, because "this fails here" is an answer and "we never looked" is not.',
+  fields: (t) => ({
+    techniques: t.field({
+      type: [Technique],
+      description: 'Verified to work.',
+      resolve: (v) => v.techniques as never,
+    }),
+    dishTypes: t.field({ type: [DishType], resolve: (v) => v.dishTypes as never }),
+    failingTechniques: t.field({
+      type: [Technique],
+      description: 'Verified to fail. Still worth asking, because the answer is useful.',
+      resolve: (v) => v.failingTechniques as never,
+    }),
+    failingDishTypes: t.field({ type: [DishType], resolve: (v) => v.failingDishTypes as never }),
+    total: t.exposeInt('total', {
+      description: 'How many substitutions exist at all under the given dietary constraints.',
+    }),
+  }),
+});
+
 const SubstitutionScope = builder.objectRef<{
   techniques: string[]; excludedTechniques: string[];
   dishTypes: string[]; excludedDishTypes: string[];
@@ -143,6 +172,53 @@ Ingredient.implement({
     children: t.field({
       type: [Ingredient],
       resolve: async (p, _a, ctx) => ctx.loaders.childrenByParent.load(p.id),
+    }),
+
+    availableContexts: t.field({
+      type: AvailableContexts,
+      description:
+        'Free tier on purpose. Knowing which questions are answerable should never be behind a paywall.',
+      args: { requires: t.arg({ type: [DietaryConstraint], required: false }) },
+      resolve: async (parent, args, ctx) => {
+        const subs = await ctx.db
+          .select()
+          .from(s.substitutions)
+          .where(eq(s.substitutions.fromId, parent.id));
+
+        const techniques = new Set<string>();
+        const dishTypes = new Set<string>();
+        const failingTechniques = new Set<string>();
+        const failingDishTypes = new Set<string>();
+        let total = 0;
+
+        for (const sub of subs) {
+          if (args.requires?.length) {
+            const dietary = await ctx.loaders.dietaryBySub.load(sub.id);
+            const satisfied = new Set(
+              dietary.filter((d) => d.kind === 'SATISFIES').map((d) => d.value),
+            );
+            if (!args.requires.every((r) => satisfied.has(r))) continue;
+          }
+          total += 1;
+          for (const row of await ctx.loaders.scopeBySub.load(sub.id)) {
+            const works = row.included === 1;
+            if (row.dimension === 'TECHNIQUE') {
+              (works ? techniques : failingTechniques).add(row.value);
+            } else if (row.dimension === 'DISH_TYPE') {
+              (works ? dishTypes : failingDishTypes).add(row.value);
+            }
+          }
+        }
+
+        return {
+          techniques: [...techniques],
+          dishTypes: [...dishTypes],
+          // A context that works for one substitution is not "failing" overall.
+          failingTechniques: [...failingTechniques].filter((v) => !techniques.has(v)),
+          failingDishTypes: [...failingDishTypes].filter((v) => !dishTypes.has(v)),
+          total,
+        };
+      },
     }),
 
     substitutions: t.connection(

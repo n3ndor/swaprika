@@ -45,6 +45,33 @@ interface Edge {
   reliability?: string | null;
 }
 
+interface Availability {
+  techniques: string[];
+  dishTypes: string[];
+  failingTechniques: string[];
+  failingDishTypes: string[];
+  total: number;
+}
+
+/**
+ * Three states, not two. "We know this fails" is an answer worth offering.
+ * "We have no data" is a dead end and gets greyed out.
+ */
+type OptionState = 'works' | 'fails' | 'nodata';
+
+function stateFor(p: Preset, a: Availability | null): OptionState {
+  if (!a) return 'works';
+  if (!p.technique && !p.dishType) return a.total > 0 ? 'works' : 'nodata';
+  if (p.technique) {
+    if (a.techniques.includes(p.technique)) return 'works';
+    if (a.failingTechniques.includes(p.technique)) return 'fails';
+    return 'nodata';
+  }
+  if (a.dishTypes.includes(p.dishType!)) return 'works';
+  if (a.failingDishTypes.includes(p.dishType!)) return 'fails';
+  return 'nodata';
+}
+
 function buildQuery(id: string, preset: Preset, vegan: boolean, plan: Plan): string {
   const ctx: string[] = [];
   if (preset.technique) ctx.push(`technique: ${preset.technique}`);
@@ -87,8 +114,39 @@ export default function Demo() {
   const [edges, setEdges] = useState<Edge[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [errored, setErrored] = useState(false);
+  const [avail, setAvail] = useState<Availability | null>(null);
 
   const preset = PRESETS[presetIndex];
+
+  // Which questions this ingredient can answer at all. Reloaded whenever the
+  // ingredient or the dietary constraint changes, because both move the goalposts.
+  useEffect(() => {
+    let cancelled = false;
+    const q = `query {
+  ingredient(id: "${ingredient}") {
+    availableContexts${vegan ? '(requires: [VEGAN])' : ''} {
+      techniques dishTypes failingTechniques failingDishTypes total
+    }
+  }
+}`;
+    fetch('/graphql', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: q }),
+    })
+      .then((r) => r.json())
+      .then((j) => {
+        if (!cancelled) setAvail(j?.data?.ingredient?.availableContexts ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setAvail(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [ingredient, vegan]);
+
+  const currentState = stateFor(preset, avail);
   const query = useMemo(
     () => buildQuery(ingredient, preset, vegan, plan),
     [ingredient, preset, vegan, plan],
@@ -139,9 +197,15 @@ export default function Demo() {
             ))}
           </select>
           <select value={presetIndex} onChange={(e) => setPresetIndex(Number(e.target.value))}>
-            {PRESETS.map((p, i) => (
-              <option key={p.label} value={i}>{p.label}</option>
-            ))}
+            {PRESETS.map((p, i) => {
+              const st = stateFor(p, avail);
+              return (
+                <option key={p.label} value={i} disabled={st === 'nodata'}>
+                  {p.label}
+                  {st === 'nodata' ? '  (no data)' : st === 'fails' ? '  (known to fail)' : ''}
+                </option>
+              );
+            })}
           </select>
           <span>?</span>
         </div>
@@ -199,12 +263,15 @@ export default function Demo() {
                 <p>
                   {errored
                     ? 'The API did not answer. It may be waking up, try again.'
-                    : 'Nothing verified for this one.'}
+                    : currentState === 'fails'
+                      ? 'Known to fail here.'
+                      : 'No verified substitution.'}
                 </p>
                 {!errored && (
                   <small>
-                    Every other food API would still hand you an answer here. Returning
-                    nothing is the honest result.
+                    {currentState === 'fails'
+                      ? 'This is recorded as a failure, not a gap. Every other food API would still hand you an answer and ruin the dish.'
+                      : 'We have not tested this combination. Saying nothing beats guessing.'}
                   </small>
                 )}
               </motion.div>
