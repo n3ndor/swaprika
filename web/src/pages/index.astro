@@ -9,10 +9,10 @@ import App from '../components/App';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Swaprika, context aware ingredient substitution</title>
+    <title>Swaprika, what to use instead and where it works</title>
     <meta
       name="description"
-      content="A swap is only true somewhere. Butter becomes oil in a cake and ruins a croissant. Swaprika is a GraphQL API that knows where a substitution works, what it loses, and what to change."
+      content="A swap is only true somewhere. Butter becomes oil in a cake and ruins a croissant. Pick where you are cooking and what ran out, and Swaprika shows what to use instead, what it changes, and where it fails."
     />
     <meta name="theme-color" content="#f5ead8" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -20,9 +20,8 @@ import App from '../components/App';
   </head>
 
   <body>
-    <!-- Rendered on the server, so every document is in the HTML for readers,
-         crawlers and anyone with JavaScript off. The curtain is an overlay, not
-         a gate on the content beneath it. -->
+    <!-- Server rendered and fully static: the data is in the bundle and there is
+         no backend. The curtain is an overlay, not a gate on the page beneath. -->
     <App client:load />
 
     <noscript>
