@@ -156,6 +156,42 @@
 .tile-tos span { font-size: 11px; padding: 3px 10px; border-radius: 999px; background: var(--color-bg); color: color-mix(in srgb, var(--color-text) 70%, transparent); }
 .tile-go { font-size: 12px; color: var(--paprika-deep); margin-top: 4px; }
 
+/* how it works */
+.how-head { max-width: 60ch; margin-bottom: 38px; }
+.how-section { margin-bottom: 52px; }
+.how-section > h2 { font-family: var(--font-heading); font-size: clamp(22px, 3vw, 28px); margin: 0 0 16px; }
+.how-say { font-size: 15.5px; line-height: 1.65; color: color-mix(in srgb, var(--color-text) 72%, transparent); max-width: 68ch; margin: 0 0 18px; }
+.steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.step3 { background: var(--color-surface); border-radius: 30px; padding: 22px; }
+.step3 h3 { font-family: var(--font-heading); font-size: 18px; margin: 12px 0 6px; }
+.step3 p { margin: 0; font-size: 14px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 72%, transparent); }
+.anatomy { display: grid; grid-template-columns: minmax(300px, 400px) 1fr; gap: 28px; align-items: start; }
+.anatomy-list { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 12px; font-size: 14.5px; line-height: 1.6; color: color-mix(in srgb, var(--color-text) 78%, transparent); }
+.anatomy-list li::marker { font-family: var(--font-heading); color: var(--paprika-deep); }
+.anatomy-list b { color: var(--color-text); }
+.anatomy-list .rel { margin: 0 2px; }
+.answers, .pairs { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.answer, .pair { background: var(--color-surface); border-radius: 30px; padding: 22px; display: flex; flex-direction: column; gap: 8px; }
+.answer h3, .pair h3 { font-family: var(--font-heading); font-size: 18px; margin: 0; }
+.answer p, .pair p { margin: 0; font-size: 14px; line-height: 1.55; color: color-mix(in srgb, var(--color-text) 75%, transparent); flex: 1; }
+.answer.works { border-top: 5px solid var(--leaf-light); }
+.answer.fails { border-top: 5px solid var(--paprika); }
+.answer.nothing { border-top: 5px dashed var(--color-neutral-400); }
+.pair-tries { display: flex; flex-wrap: wrap; gap: 14px; }
+.trybtn { align-self: flex-start; background: none; border: 0; padding: 4px 0; cursor: pointer; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--paprika-deep); }
+.trybtn:hover { text-decoration: underline; }
+.facts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.factcard { background: var(--color-bg); border: 1px solid var(--color-divider); border-radius: 26px; padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+.factcard p { margin: 0; font-size: 14px; line-height: 1.55; flex: 1; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; max-width: 720px; }
+.stats div { background: var(--color-surface); border-radius: 24px; padding: 16px 18px; }
+.stats b { display: block; font-family: var(--font-heading); font-weight: 400; font-size: 30px; color: var(--paprika-deep); }
+.stats span { font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 60%, transparent); }
+@media (max-width: 760px) {
+  .steps3, .anatomy { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; }
+}
+
 /* footer */
 .foot { border-top: 1px solid var(--color-divider); padding: 26px 24px 40px; }
 .foot-in { max-width: 1080px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; font-size: 12.5px; color: color-mix(in srgb, var(--color-text) 50%, transparent); }
