@@ -1,0 +1,28 @@
+{
+  "name": "swaprika",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "A GraphQL API for context aware ingredient substitution",
+  "scripts": {
+    "dev": "wrangler dev",
+    "typecheck": "tsc --noEmit",
+    "db:reset": "wrangler d1 execute swaprika --local --file=./migrations/0001_init.sql",
+    "db:seed": "wrangler d1 execute swaprika --local --file=./data/seed.sql"
+  },
+  "dependencies": {
+    "@pothos/core": "^4.15.1",
+    "@pothos/plugin-dataloader": "^4.4.6",
+    "@pothos/plugin-relay": "^4.8.1",
+    "@pothos/plugin-scope-auth": "^4.2.1",
+    "dataloader": "^2.2.3",
+    "drizzle-orm": "^0.45.3",
+    "graphql": "^17.0.2",
+    "graphql-yoga": "^5.24.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260922.1",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.136.2"
+  }
+}
