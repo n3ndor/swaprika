@@ -10,16 +10,15 @@ loses, what you have to adjust, and where it is known to fail.
 
 ## What is in it
 
-- 49 ingredients in six families and 133 swaps, across 45 dishes and techniques
-- Every swap says where it works and where it is known to fail, and every failure
-  comes with the reason
-- Some situations, such as laminating a croissant with anything but butter, have
-  only recorded failures. The site says so instead of guessing
+- 49 ingredients in six families and 133 swaps, across 44 dishes and techniques
+- Only what works is shown. A dish or an ingredient with no good swap is simply not
+  offered, so every card on the page is one you can use
+- Each card says how much to use, what the swap keeps and loses, what changes, what
+  to adjust, and which dishes it is not for
 - A How it works page explains how to read a card, with examples that open the
   exact case in the finder
 
-The dataset lives in [`web/src/data/swaps.ts`](web/src/data/swaps.ts), with the
-failure reasons in [`web/src/data/why.ts`](web/src/data/why.ts). It is common
+The dataset lives in [`web/src/data/swaps.ts`](web/src/data/swaps.ts). It is common
 kitchen knowledge, written by hand. There is no backend, no API and no account.
 
 ## Run it
