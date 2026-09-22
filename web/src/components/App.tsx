@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pepper } from './Pepper';
-import { INGREDIENTS, SITUATIONS, SWAPS, type Swap } from '../data/swaps';
+import { EM, MIDDOT, SwapCard, sentence } from './SwapCard';
+import HowItWorks from './HowItWorks';
+import { INGREDIENTS, INGREDIENT_GROUPS, SITUATIONS, SWAPS, type Swap } from '../data/swaps';
 
-/** The design sets copy with em dashes; repo style bans the literal glyph. */
-const EM = String.fromCharCode(0x2014);
-const MIDDOT = String.fromCharCode(0x00b7);
-
-type Screen = 'home' | 'browse';
+type Screen = 'home' | 'browse' | 'how';
 
 const SITS = SITUATIONS;
 const TECHNIQUE_GROUP = SITS.findIndex((g) => g.g === 'Technique');
+const DISHES = SITS.reduce((n, g) => n + g.items.length, 0) - 1;
 
 const WORD: [string, string][] = [
   ['S', 'ugar'], ['w', 'heat flour'], ['a', 'quafaba'], ['p', 'aprika'],
@@ -19,6 +18,7 @@ const WORD: [string, string][] = [
 interface Ing {
   id: string;
   name: string;
+  group: string;
   roles: string[];
   subs: Swap[];
 }
@@ -27,11 +27,28 @@ interface Ing {
 const PANTRY: Ing[] = INGREDIENTS.map((i) => ({ ...i, subs: SWAPS.filter((s) => s.from === i.id) }));
 const TOTAL_SWAPS = SWAPS.length;
 
-const human = (s: string) => s.toLowerCase().replace(/_/g, ' ');
-const sentence = (s: string) => {
-  const t = human(s);
-  return t.charAt(0).toUpperCase() + t.slice(1);
+const labelOf = (code: string) => {
+  for (const g of SITS) for (const it of g.items) if (it[0] === code) return it[1];
+  return '';
 };
+const groupOf = (code: string) => SITS.findIndex((g) => g.items.some((x) => x[0] === code));
+
+/** A situation phrased the way a cook would say it: "Making a cake", "Whipping". */
+const making = (code: string) =>
+  groupOf(code) === TECHNIQUE_GROUP ? sentence(labelOf(code)) : `Making ${labelOf(code)}`;
+
+/** Ready made questions, so a first visit starts from a real situation. */
+const SCENARIOS: { text: string; sit: string; ing: string }[] = [
+  { text: 'Pancakes, but no buttermilk', sit: 'PANCAKE', ing: 'buttermilk' },
+  { text: 'Brownies, but no eggs', sit: 'BROWNIES', ing: 'egg' },
+  { text: 'Pasta sauce, but no cream', sit: 'PASTA_SAUCE', ing: 'heavy-cream' },
+  { text: 'A curry, but no coconut milk', sit: 'CURRY', ing: 'coconut-milk' },
+  { text: 'Pizza dough, but no dry yeast', sit: 'PIZZA', ing: 'yeast' },
+  { text: 'Pesto, but no pine nuts', sit: 'PESTO', ing: 'pine-nuts' },
+  { text: 'Cheesecake, but no cream cheese', sit: 'CHEESECAKE', ing: 'cream-cheese' },
+  { text: 'A stir fry, but no soy sauce', sit: 'STIR_FRY', ing: 'soy-sauce' },
+  { text: 'Croissants, but no butter', sit: 'CROISSANT', ing: 'butter' },
+];
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home');
@@ -39,6 +56,7 @@ export default function App() {
   const [sit, setSit] = useState('CAKE');
   const [tab, setTab] = useState(1);
   const [ing, setIng] = useState('butter');
+  const [showAll, setShowAll] = useState(false);
   // `revealed` is the automatic reveal that plays once the cards are on screen.
   // `manual` records every card the visitor has flipped by hand, and wins.
   const [revealed, setRevealed] = useState(false);
@@ -54,18 +72,19 @@ export default function App() {
     return () => clearInterval(t);
   }, []);
 
-  // A link to #find or #pantry skips the curtain.
+  // A link to #find, #pantry or #how skips the curtain.
   useEffect(() => {
     const h = window.location.hash.replace(/^#/, '');
-    if (h === 'find' || h === 'pantry') {
+    if (h === 'find' || h === 'pantry' || h === 'how') {
       setGone(true);
       if (h === 'pantry') setScreen('browse');
+      if (h === 'how') setScreen('how');
     }
   }, []);
 
   useEffect(() => {
     if (!gone) return;
-    const h = screen === 'browse' ? '#pantry' : '#find';
+    const h = screen === 'browse' ? '#pantry' : screen === 'how' ? '#how' : '#find';
     if (window.location.hash !== h) window.history.replaceState(null, '', h);
   }, [screen, gone]);
 
@@ -104,15 +123,33 @@ export default function App() {
     () => (current?.subs ?? []).filter((s) => sit === 'ANY' || s.ok.includes(sit)),
     [current, sit],
   );
-
-  const sitLabel = useMemo(() => {
-    for (const g of SITS) for (const it of g.items) if (it[0] === sit) return it[1];
-    return '';
-  }, [sit]);
-  const sitGroupIdx = useMemo(() => SITS.findIndex((g) => g.items.some((x) => x[0] === sit)), [sit]);
-  const phrase = sit === 'ANY' ? 'anywhere' : (sitGroupIdx === TECHNIQUE_GROUP ? `when ${sitLabel}` : `in ${sitLabel}`);
-  const failsHere = sit !== 'ANY' && (current?.subs ?? []).some((s) => s.no.includes(sit));
+  const failing = useMemo(
+    () => (sit === 'ANY' ? [] : (current?.subs ?? []).filter((s) => s.no.includes(sit))),
+    [current, sit],
+  );
   const lowerName = (current?.name ?? '').toLowerCase();
+  const phrase = sit === 'ANY' ? '' : (groupOf(sit) === TECHNIQUE_GROUP ? `when ${labelOf(sit)}` : `in ${labelOf(sit)}`);
+
+  // Step 2 shows only the ingredients that have something on file for this dish.
+  const chips = useMemo(() => PANTRY.map((p) => ({
+    p,
+    works: p.subs.filter((s) => sit === 'ANY' || s.ok.includes(sit)).length,
+    fails: sit !== 'ANY' && p.subs.some((s) => s.no.includes(sit)),
+  })), [sit]);
+  const relevant = chips.filter((c) => c.works || c.fails);
+  const hidden = chips.filter((c) => !c.works && !c.fails);
+  const visibleChips = showAll ? chips : [...relevant, ...hidden.filter((c) => c.p.id === ing)];
+
+  const jump = useCallback((s: string, i: string) => {
+    const g = groupOf(s);
+    if (g >= 0) setTab(g);
+    setSit(s);
+    setIng(i);
+    setShowAll(false);
+    setScreen('home');
+    stage();
+    setTimeout(() => resultsEl.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+  }, [stage]);
 
   const enter = useCallback(() => {
     if (flipTimer.current) clearTimeout(flipTimer.current);
@@ -122,12 +159,6 @@ export default function App() {
     setTimeout(maybeStart, 950);
   }, [maybeStart]);
 
-  const flippedAt = (i: number) => (i in manual ? manual[i] : revealed);
-  // The staggered delay belongs to the automatic reveal only. A card flipped by
-  // hand turns immediately, in both directions.
-  const delayAt = (i: number) => (i in manual ? '0ms' : `${i * 260}ms`);
-  const flip = (i: number) => setManual((m) => ({ ...m, [i]: !(i in m ? m[i] : revealed) }));
-
   const toCover = useCallback(() => {
     setGone(false);
     setScreen('home');
@@ -135,25 +166,40 @@ export default function App() {
     stage();
   }, [stage]);
 
-  const nav = (k: Screen) => ({ 'aria-current': (screen === k ? 'page' : undefined) as 'page' | undefined });
+  const go = (s: Screen) => { setScreen(s); window.scrollTo(0, 0); if (s === 'home') stage(); };
+
+  const flippedAt = (i: number) => (i in manual ? manual[i] : revealed);
+  // The staggered delay belongs to the automatic reveal only. A card flipped by
+  // hand turns immediately, in both directions.
+  const delayAt = (i: number) => (i in manual ? '0ms' : `${i * 260}ms`);
+  const flip = (i: number) => setManual((m) => ({ ...m, [i]: !(i in m ? m[i] : revealed) }));
+
+  const current_ = (s: Screen) => ({ 'aria-current': (screen === s ? 'page' : undefined) as 'page' | undefined });
+
+  const heading = sit === 'ANY' ? `Out of ${lowerName}?` : `${making(sit)} without ${lowerName}`;
+  const countText = results.length
+    ? `${results.length} ${results.length === 1 ? 'swap works' : 'swaps work'}${phrase ? ` ${phrase}` : ''}`
+    : failing.length ? 'nothing works here' : 'nothing on file';
 
   return (
     <div className="shell">
       <div style={{ position: 'relative', zIndex: 1 }}>
         <header className="topbar">
           <div className="topbar-in">
-            <button className="brandbtn" onClick={() => { setScreen('home'); stage(); }}>
+            <button className="brandbtn" onClick={() => go('home')}>
               <Pepper size={24} wag />
               <span style={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                 <span>swap</span><span className="rika">rika</span>
               </span>
             </button>
-            <nav className="mainnav">
-              <button className="navbtn" {...nav('home')} onClick={() => { setScreen('home'); stage(); }}>Find a swap</button>
-              <button className="navbtn" {...nav('browse')} onClick={() => setScreen('browse')}>Ingredients</button>
-              <span className="navsep" />
-              <button className="coverbtn" title="Back to the cover" onClick={toCover}>&#8593; Cover</button>
+            <nav className="segnav" aria-label="Main">
+              <button className="segbtn" {...current_('home')} onClick={() => go('home')}>Find a swap</button>
+              <button className="segbtn" {...current_('browse')} onClick={() => go('browse')}>Ingredients</button>
             </nav>
+            <div className="topactions">
+              <button className="helpbtn" {...current_('how')} onClick={() => go('how')}>How it works</button>
+              <button className="coverbtn" title="Back to the cover" onClick={toCover}>&#8593; Cover</button>
+            </div>
           </div>
         </header>
 
@@ -174,16 +220,27 @@ export default function App() {
               </div></div></div></div></div>
             </div>
             <div className="inner">
-              <p className="kicker">Start with the situation</p>
+              <p className="kicker">Something ran out?</p>
               <h1>A swap is only true somewhere.</h1>
-              <p className="say">Butter becomes oil in a cake and ruins a croissant. Tell us where you are cooking, then what ran out.</p>
+              <p className="say">
+                Out of eggs halfway through the brownies? No buttermilk for the pancakes? Tell
+                Swaprika what you are making and what is missing. It tells you what to use
+                instead, how much of it, what will turn out different, and what to change so the
+                dish still works. When nothing works, it says that too.
+              </p>
+            </div>
+            <div className="tryrow">
+              <span className="tryrow-label">Try one:</span>
+              {SCENARIOS.map((s) => (
+                <button key={s.text} className="scenario" onClick={() => jump(s.sit, s.ing)}>{s.text}</button>
+              ))}
             </div>
           </div>
 
           <section className="stepcard">
             <div className="steprow">
               <span className="stepnum">1</span>
-              <h2>Where are you cooking?</h2>
+              <h2>What are you making?</h2>
             </div>
             <div className="tabstrip" role="tablist">
               {SITS.map((g, i) => (
@@ -195,7 +252,7 @@ export default function App() {
             <div className="chiprow">
               {SITS[tab].items.map(([code, label]) => (
                 <button key={code} className="pill" aria-pressed={sit === code}
-                  onClick={() => { setSit(code); stage(); }}>
+                  onClick={() => { setSit(code); setShowAll(false); stage(); }}>
                   {label}
                 </button>
               ))}
@@ -203,107 +260,77 @@ export default function App() {
 
             <div className="steprow">
               <span className="stepnum">2</span>
-              <h2>What ran out?</h2>
+              <h2>What is missing?</h2>
               <span className="stephint">
-                {sit === 'ANY' ? 'anything in the pantry' : `the number is how many swaps hold up ${phrase}`}
+                {sit === 'ANY'
+                  ? 'pick anything from the pantry'
+                  : `showing the ${relevant.length} that matter ${phrase}, the number is how many swaps work`}
               </span>
             </div>
             <div className="chiprow last">
-              {PANTRY.map((p) => {
-                const works = p.subs.filter((s) => sit === 'ANY' || s.ok.includes(sit)).length;
-                const fails = sit !== 'ANY' && p.subs.some((s) => s.no.includes(sit));
-                return (
-                  <button key={p.id} className={`pill ing${works ? '' : ' dead'}`} aria-pressed={ing === p.id}
-                    onClick={() => { setIng(p.id); stage(); }}>
-                    {p.name}
-                    <span className="hint">{works ? works : fails ? 'fails' : EM}</span>
-                  </button>
-                );
-              })}
+              {visibleChips.map(({ p, works, fails }) => (
+                <button key={p.id} className={`pill ing${works ? '' : ' dead'}`} aria-pressed={ing === p.id}
+                  onClick={() => { setIng(p.id); stage(); }}>
+                  {p.name}
+                  <span className="hint">{works ? works : fails ? 'fails' : EM}</span>
+                </button>
+              ))}
+              {sit !== 'ANY' && hidden.length > 0 && (
+                <button className="morebtn" onClick={() => setShowAll((v) => !v)}>
+                  {showAll ? 'Show only what matters' : `+ ${hidden.length} more, nothing on file ${phrase}`}
+                </button>
+              )}
             </div>
           </section>
 
-          <section ref={resultsEl}>
+          <section ref={resultsEl} className="results">
             <div className="results-head">
-              <h2>
-                {results.length
-                  ? `Instead of ${lowerName}, ${phrase}`
-                  : sit === 'ANY'
-                    ? `Nothing on file for ${lowerName}`
-                    : `No ${lowerName} swap works ${phrase}`}
-              </h2>
-              <span className="results-count">{results.length} {results.length === 1 ? 'swap' : 'swaps'}</span>
+              <h2>{heading}</h2>
+              <span className="results-count">{countText}</span>
             </div>
 
             {results.length > 0 ? (
-              <div className="grid-cards">
-                {results.map((r, i) => (
-                  <article key={`${r.to}-${i}`} className="swap" style={{ animationDelay: `${i * 90}ms` }}>
-                    <div className="strip-outer">
-                      <div className="strip" style={{ transform: `rotateX(${flippedAt(i) ? -180 : 0}deg)`, transitionDelay: delayAt(i) }}>
-                        <div className="face face-a">
-                          <small>you had</small>
-                          <strong>{current?.name}</strong>
-                        </div>
-                        <div className="face face-b">
-                          <small>use instead</small>
-                          <strong>{r.to}</strong>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        className="swapbadge"
-                        aria-pressed={flippedAt(i)}
-                        aria-label={flippedAt(i) ? `Show ${current?.name ?? 'the original'} again` : `Show ${r.to}`}
-                        title="Flip the card"
-                        onClick={() => flip(i)}
-                        style={{
-                          background: flippedAt(i) ? 'rgba(251,234,222,.22)' : 'var(--paprika)',
-                          color: flippedAt(i) ? 'var(--curtain-ink)' : '#fff',
-                          transform: `rotate(${flippedAt(i) ? 180 : 0}deg)`,
-                          transitionDelay: delayAt(i),
-                        }}
-                      >
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                          <path d="M16 3h5v5" /><path d="M21 3 9 15" /><path d="M8 21H3v-5" /><path d="M3 21 15 9" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    <div className="swap-body">
-                      <div className="ratio-row">
-                        <span className="ratio-n">{r.amount}&times;</span>
-                        <span className="ratio-b">{r.basis === 'WEIGHT' ? 'by weight' : 'by volume'}</span>
-                        <span className={`rel ${r.rel.toLowerCase()}`}>{r.rel.toLowerCase()}</span>
-                      </div>
-                      {r.note && <p className="swap-note">{r.note}</p>}
-                      <div className="roletags">
-                        {r.keeps.map((k) => <span key={k} className="roletag keeps">keeps {k}</span>)}
-                        {r.loses.map((l) => <span key={l} className="roletag loses">loses {l}</span>)}
-                      </div>
-                      {(r.eff ?? []).map(([dim, dir, note]) => (
-                        <p key={dim} className="eff">
-                          <b>{sentence(dim)} {dir}{note ? ` ${EM}` : ''}</b> {note}
-                        </p>
-                      ))}
-                      {(r.adj ?? []).map(([what, detail]) => (
-                        <p key={what} className="adj">
-                          <b>{sentence(what)} {EM} </b>{detail}
-                        </p>
-                      ))}
-                    </div>
-                  </article>
-                ))}
-              </div>
+              <>
+                <p className="results-tip">Tap the arrow on a card to flip between what you had and what to use.</p>
+                <div className="grid-cards">
+                  {results.map((r, i) => (
+                    <SwapCard
+                      key={`${ing}-${r.to}-${i}`}
+                      swap={r}
+                      fromName={current?.name ?? ''}
+                      flipped={flippedAt(i)}
+                      delay={delayAt(i)}
+                      onFlip={() => flip(i)}
+                      style={{ animationDelay: `${i * 90}ms` }}
+                    />
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="empty-state">
                 <div className="empty-mark">{EM}</div>
-                <h3>{failsHere ? 'Known to fail here.' : 'Nothing on file.'}</h3>
-                <p>
-                  {failsHere
-                    ? 'This one is on record as a bad idea, not a gap. Most swap lists would still hand you something and ruin the dish.'
-                    : 'No swap is recorded for this combination. Saying nothing beats guessing.'}
-                </p>
+                <h3>{failing.length ? 'Known to fail here.' : 'Nothing on file.'}</h3>
+                {failing.length ? (
+                  <>
+                    <p>
+                      This is on record as a bad idea, not a gap. Most swap lists would still hand
+                      you something here and ruin the dish. What fails, and why:
+                    </p>
+                    <ul className="fail-list">
+                      {failing.map((s) => (
+                        <li key={s.to}>
+                          <b>{s.to}</b>{' '}
+                          {s.loses.length ? `loses the ${s.loses.join(' and the ')}` : (s.eff?.[0]?.[2] ?? '')}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <p>No swap for {lowerName} is recorded {phrase}. Saying nothing beats guessing.</p>
+                )}
+                <button className="trybtn" onClick={() => { setSit('ANY'); setTab(0); setShowAll(false); stage(); }}>
+                  See every swap for {lowerName} &rarr;
+                </button>
               </div>
             )}
           </section>
@@ -311,30 +338,42 @@ export default function App() {
 
         {/* INGREDIENTS */}
         <main className={`wrap ${screen === 'browse' ? '' : 'is-hidden'}`}>
-          <div className="screen-head head-sm" style={{ maxWidth: '46ch' }}>
+          <div className="screen-head head-sm" style={{ maxWidth: '52ch' }}>
             <div className="blob blob-leaf" style={{ right: -300, top: -80, width: 260, height: 260 }} />
             <p className="kicker" style={{ position: 'relative', zIndex: 1 }}>The pantry</p>
             <h1>{PANTRY.length} ingredients, {TOTAL_SWAPS} swaps.</h1>
-            <p>Every swap says where it works and where it fails, because the situation changes the answer. Pick one to see where it can go.</p>
+            <p>
+              Pick anything you have run out of to see every swap on file for it, from the dishes
+              where it works to the ones where it is known to fail.
+            </p>
           </div>
-          <div className="grid-pantry">
-            {PANTRY.map((p) => (
-              <button key={p.id} className="tile pantry"
-                onClick={() => { setIng(p.id); setSit('ANY'); setTab(0); setScreen('home'); stage(); window.scrollTo(0, 0); }}>
-                <span className="tile-name">
-                  <Pepper size={17} style={{ flex: 'none' }} />
-                  <strong>{p.name}</strong>
-                </span>
-                <span className="tile-role">{p.roles.slice(0, 3).join(` ${MIDDOT} `)}</span>
-                <span className="tile-tos">
-                  {[...new Set(p.subs.map((s) => s.to))].slice(0, 3).map((t) => <span key={t}>{t}</span>)}
-                </span>
-                <span className="tile-go">
-                  {p.subs.length} {p.subs.length === 1 ? 'swap' : 'swaps'} &rarr;
-                </span>
-              </button>
-            ))}
-          </div>
+          {INGREDIENT_GROUPS.map((g) => (
+            <section key={g} className="pantry-group">
+              <p className="group-label">{g}</p>
+              <div className="grid-pantry">
+                {PANTRY.filter((p) => p.group === g).map((p) => (
+                  <button key={p.id} className="tile pantry" onClick={() => jump('ANY', p.id)}>
+                    <span className="tile-name">
+                      <Pepper size={17} style={{ flex: 'none' }} />
+                      <strong>{p.name}</strong>
+                    </span>
+                    <span className="tile-role">{p.roles.slice(0, 3).join(` ${MIDDOT} `)}</span>
+                    <span className="tile-tos">
+                      {[...new Set(p.subs.map((s) => s.to))].slice(0, 3).map((t) => <span key={t}>{t}</span>)}
+                    </span>
+                    <span className="tile-go">
+                      {p.subs.length} {p.subs.length === 1 ? 'swap' : 'swaps'} &rarr;
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          ))}
+        </main>
+
+        {/* HOW IT WORKS */}
+        <main className={`wrap ${screen === 'how' ? '' : 'is-hidden'}`}>
+          <HowItWorks onTry={jump} />
         </main>
 
         <footer className="foot">
@@ -376,7 +415,11 @@ export default function App() {
           </div>
 
           <p className="curtain-line">
-            {TOTAL_SWAPS} swaps that know where they work, and say nothing where they do not.
+            Out of buttermilk for the pancakes? No eggs for the brownies? Pick the dish and what is
+            missing, and get the swap that actually works for it.
+          </p>
+          <p className="curtain-stat">
+            {TOTAL_SWAPS} swaps {MIDDOT} {PANTRY.length} ingredients {MIDDOT} {DISHES} dishes and techniques
           </p>
 
           <div className="enter-wrap">
