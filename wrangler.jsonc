@@ -4,6 +4,10 @@
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "observability": { "enabled": true },
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "swaprika.nagysolution.com", "custom_domain": true }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
