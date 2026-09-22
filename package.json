@@ -1,31 +1,16 @@
 {
   "name": "swaprika",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "A GraphQL API for context aware ingredient substitution",
+  "description": "What to use instead of an ingredient, and where the swap works. A static site.",
   "scripts": {
-    "dev": "wrangler dev",
-    "typecheck": "tsc --noEmit",
-    "db:reset": "wrangler d1 execute swaprika --local --file=./migrations/0001_init.sql",
-    "db:seed": "wrangler d1 execute swaprika --local --file=./data/seed.sql",
-    "web:install": "npm --prefix web install",
-    "web:build": "npm --prefix web run build",
-    "deploy": "npm run web:build && wrangler deploy"
-  },
-  "dependencies": {
-    "@pothos/core": "^4.15.1",
-    "@pothos/plugin-dataloader": "^4.4.6",
-    "@pothos/plugin-relay": "^4.8.1",
-    "@pothos/plugin-scope-auth": "^4.2.1",
-    "dataloader": "^2.2.3",
-    "drizzle-orm": "^0.45.3",
-    "graphql": "^17.0.2",
-    "graphql-yoga": "^5.24.1"
+    "setup": "npm install && npm --prefix web install",
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "deploy": "npm run build && wrangler deploy"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260922.1",
-    "typescript": "^7.0.2",
     "wrangler": "^4.136.2"
   }
 }
