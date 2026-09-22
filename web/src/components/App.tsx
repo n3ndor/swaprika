@@ -342,8 +342,8 @@ export default function App() {
             <button onClick={toCover}>&#8593; Back to the cover</button>
             <span>Swaprika {MIDDOT} what to use instead, and where it works</span>
             <span>
-              A <a href="https://nagysolution.com">Nagy Solution</a> project {MIDDOT}{' '}
-              <a href="https://github.com/n3ndor/swaprika">source</a>
+              A <a href="https://nagysolution.com" target="_blank" rel="noopener noreferrer">Nagy Solution</a> project {MIDDOT}{' '}
+              <a href="https://github.com/n3ndor/swaprika" target="_blank" rel="noopener noreferrer">source</a>
             </span>
           </div>
         </footer>
@@ -386,9 +386,12 @@ export default function App() {
                 <path d="M5 12h13" /><path d="m12 5 7 7-7 7" />
               </svg>
             </button>
-            <a className="enter-note" href="https://nagysolution.com">A Nagy Solution project</a>
           </div>
         </div>
+
+        <a className="curtain-credit" href="https://nagysolution.com" target="_blank" rel="noopener noreferrer">
+          A Nagy Solution project &#8599;
+        </a>
       </div>
     </div>
   );
