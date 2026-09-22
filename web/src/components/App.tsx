@@ -199,18 +199,19 @@ export default function App() {
         {/* FIND A SWAP */}
         <main className={`wrap ${screen === 'home' ? '' : 'is-hidden'}`}>
           <div className="screen-head">
-            <div className="blob blob-sage" style={{ right: -40, top: -70, width: 280, height: 280 }} />
-            {/* The pepper flies a slow loop. Its shadow runs on the same clocks with
-                every direction inverted, so it always moves against the pepper and
-                shrinks as the pepper climbs. */}
+            <div className="blob blob-sage hero-blob" />
+            {/* The pepper flies a slow loop and zooms towards you and back. Its
+                shadow runs on the same clocks: every direction inverted, and tied
+                to the zoom, so it sits close and sharp when the pepper is far and
+                drifts off, blurred and faint, when the pepper comes close. */}
             <div className="hero-art deco" aria-hidden="true">
-              <div className="shade"><div className="sx"><div className="sy"><div className="sb">
+              <div className="shade"><div className="sx"><div className="sy"><div className="sb"><div className="sdepth">
                 <Pepper size={96} mono="var(--color-neutral-900)" noLeaf
-                  style={{ filter: 'blur(7px)', transform: 'skewX(-14deg) scaleY(.86)' }} />
-              </div></div></div></div>
-              <div className="fly"><div className="ax"><div className="ay"><div className="ab"><div className="yaw">
-                <Pepper size={120} wag shine />
+                  style={{ transform: 'skewX(-14deg) scaleY(.86)' }} />
               </div></div></div></div></div>
+              <div className="fly"><div className="ax"><div className="ay"><div className="ab"><div className="depth"><div className="yaw">
+                <Pepper size={120} wag shine />
+              </div></div></div></div></div></div>
             </div>
             <div className="inner">
               <p className="kicker">Something ran out?</p>
